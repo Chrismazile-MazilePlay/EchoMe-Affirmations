@@ -6,6 +6,39 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */; };
+		2A903DD32E147133003FC209 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCE2E147133003FC209 /* ContentView.swift */; };
+		2A903DD42E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */; };
+		2A903DD52E147133003FC209 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DD02E147133003FC209 /* WatchConnectivityManager.swift */; };
+		2A903DD62E147133003FC209 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A903DCD2E147133003FC209 /* Assets.xcassets */; };
+		2A903DDB2E1473C9003FC209 /* FavoritesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DDA2E1473C5003FC209 /* FavoritesManager.swift */; };
+		2AA8CF272E13718B003B2C59 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA8CF262E13718B003B2C59 /* FirebaseAuth */; };
+		2AA8CF292E13718B003B2C59 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA8CF282E13718B003B2C59 /* FirebaseFirestore */; };
+		2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF412E1427F2003B2C59 /* AuthenticationView.swift */; };
+		2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF422E1427F2003B2C59 /* ContentView.swift */; };
+		2AA8CF4F2E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */; };
+		2AA8CF502E1427F2003B2C59 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF452E1427F2003B2C59 /* FavoritesView.swift */; };
+		2AA8CF522E1427F2003B2C59 /* MockDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */; };
+		2AA8CF532E1427F2003B2C59 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF492E1427F2003B2C59 /* OnboardingView.swift */; };
+		2AA8CF542E1427F2003B2C59 /* SpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF4A2E1427F2003B2C59 /* SpeechManager.swift */; };
+		2AA8CF552E1427F2003B2C59 /* VoiceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF4B2E1427F2003B2C59 /* VoiceSettingsView.swift */; };
+		2AA8CF562E1427F2003B2C59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2AA8CF402E1427F2003B2C59 /* Assets.xcassets */; };
+		2AA8CF572E1427F2003B2C59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2AA8CF462E1427F2003B2C59 /* GoogleService-Info.plist */; };
+		2AA8CF652E142937003B2C59 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF642E142935003B2C59 /* User.swift */; };
+		2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF662E142943003B2C59 /* Affirmation.swift */; };
+		2AA8CF692E142953003B2C59 /* VoiceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF682E142952003B2C59 /* VoiceProfile.swift */; };
+		2AA8CF712E142A51003B2C59 /* AffirmationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */; };
+		2AA8CF732E142A83003B2C59 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */; };
+		2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF742E142A96003B2C59 /* FirebaseService.swift */; };
+		2AA8CF9A2E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2AA8CFA52E142F30003B2C59 /* MockDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */; };
+		2AA8CFA62E142F30003B2C59 /* VoiceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF682E142952003B2C59 /* VoiceProfile.swift */; };
+		2AA8CFA72E142F30003B2C59 /* Affirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF662E142943003B2C59 /* Affirmation.swift */; };
+		2AA8CFAA2E14383C003B2C59 /* Affirmation+Firestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */; };
+		2AA8CFAF2E1448AB003B2C59 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CFAE2E1448A9003B2C59 /* WatchConnectivityManager.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2AA8CF072E136F5A003B2C59 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,20 +54,78 @@
 			remoteGlobalIDString = 2AA8CEF52E136F58003B2C59;
 			remoteInfo = "EchoMe-Affirmations";
 		};
+		2AA8CF872E142DD0003B2C59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AA8CEEE2E136F58003B2C59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AA8CF792E142DCF003B2C59;
+			remoteInfo = "EchoMe-Affirmations Watch App Watch App";
+		};
+		2AA8CF912E142DD0003B2C59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AA8CEEE2E136F58003B2C59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AA8CF792E142DCF003B2C59;
+			remoteInfo = "EchoMe-Affirmations Watch App Watch App";
+		};
+		2AA8CF982E142DD0003B2C59 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2AA8CEEE2E136F58003B2C59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2AA8CF792E142DCF003B2C59;
+			remoteInfo = "EchoMe-Affirmations Watch App Watch App";
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		2AA8CF9E2E142DD0003B2C59 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				2AA8CF9A2E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationWatchView.swift; sourceTree = "<group>"; };
+		2A903DCD2E147133003FC209 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2A903DCE2E147133003FC209 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoMe_Affirmations_Watch_AppApp.swift; sourceTree = "<group>"; };
+		2A903DD02E147133003FC209 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		2A903DDA2E1473C5003FC209 /* FavoritesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesManager.swift; sourceTree = "<group>"; };
 		2AA8CEF62E136F58003B2C59 /* EchoMe-Affirmations.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EchoMe-Affirmations.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AA8CF062E136F5A003B2C59 /* EchoMe-AffirmationsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-AffirmationsTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AA8CF102E136F5A003B2C59 /* EchoMe-AffirmationsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-AffirmationsUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AA8CF402E1427F2003B2C59 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2AA8CF412E1427F2003B2C59 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
+		2AA8CF422E1427F2003B2C59 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2AA8CF432E1427F2003B2C59 /* EchoMe_Affirmations.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EchoMe_Affirmations.entitlements; sourceTree = "<group>"; };
+		2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoMe_AffirmationsApp.swift; sourceTree = "<group>"; };
+		2AA8CF452E1427F2003B2C59 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		2AA8CF462E1427F2003B2C59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDataProvider.swift; sourceTree = "<group>"; };
+		2AA8CF492E1427F2003B2C59 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		2AA8CF4A2E1427F2003B2C59 /* SpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechManager.swift; sourceTree = "<group>"; };
+		2AA8CF4B2E1427F2003B2C59 /* VoiceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSettingsView.swift; sourceTree = "<group>"; };
+		2AA8CF642E142935003B2C59 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		2AA8CF662E142943003B2C59 /* Affirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Affirmation.swift; sourceTree = "<group>"; };
+		2AA8CF682E142952003B2C59 /* VoiceProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceProfile.swift; sourceTree = "<group>"; };
+		2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCard.swift; sourceTree = "<group>"; };
+		2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		2AA8CF742E142A96003B2C59 /* FirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseService.swift; sourceTree = "<group>"; };
+		2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AA8CF862E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AA8CF902E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Affirmation+Firestore.swift"; sourceTree = "<group>"; };
+		2AA8CFAE2E1448A9003B2C59 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2AA8CEF82E136F58003B2C59 /* EchoMe-Affirmations */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "EchoMe-Affirmations";
-			sourceTree = "<group>";
-		};
 		2AA8CF092E136F5A003B2C59 /* EchoMe-AffirmationsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "EchoMe-AffirmationsTests";
@@ -45,6 +136,16 @@
 			path = "EchoMe-AffirmationsUITests";
 			sourceTree = "<group>";
 		};
+		2AA8CF892E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EchoMe-Affirmations Watch App Watch AppTests";
+			sourceTree = "<group>";
+		};
+		2AA8CF932E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EchoMe-Affirmations Watch App Watch AppUITests";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +153,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AA8CF272E13718B003B2C59 /* FirebaseAuth in Frameworks */,
+				2AA8CF292E13718B003B2C59 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,15 +172,84 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2AA8CF772E142DCF003B2C59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF832E142DD0003B2C59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF8D2E142DD0003B2C59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2A903DCB2E14710F003FC209 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CFAE2E1448A9003B2C59 /* WatchConnectivityManager.swift */,
+				2AA8CF4A2E1427F2003B2C59 /* SpeechManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		2A903DD12E147133003FC209 /* EchoMe-Affirmations Watch App Watch App */ = {
+			isa = PBXGroup;
+			children = (
+				2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */,
+				2A903DD92E14716D003FC209 /* Views */,
+				2A903DD72E147149003FC209 /* Services */,
+			);
+			path = "EchoMe-Affirmations Watch App Watch App";
+			sourceTree = "<group>";
+		};
+		2A903DD72E147149003FC209 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2A903DD82E147161003FC209 /* Managers */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		2A903DD82E147161003FC209 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				2A903DD02E147133003FC209 /* WatchConnectivityManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		2A903DD92E14716D003FC209 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2A903DCE2E147133003FC209 /* ContentView.swift */,
+				2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		2AA8CEED2E136F58003B2C59 = {
 			isa = PBXGroup;
 			children = (
-				2AA8CEF82E136F58003B2C59 /* EchoMe-Affirmations */,
+				2AA8CF4C2E1427F2003B2C59 /* EchoMe-Affirmations */,
 				2AA8CF092E136F5A003B2C59 /* EchoMe-AffirmationsTests */,
 				2AA8CF132E136F5A003B2C59 /* EchoMe-AffirmationsUITests */,
+				2A903DD12E147133003FC209 /* EchoMe-Affirmations Watch App Watch App */,
+				2A903DCD2E147133003FC209 /* Assets.xcassets */,
+				2AA8CF892E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests */,
+				2AA8CF932E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests */,
 				2AA8CEF72E136F58003B2C59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -88,8 +260,141 @@
 				2AA8CEF62E136F58003B2C59 /* EchoMe-Affirmations.app */,
 				2AA8CF062E136F5A003B2C59 /* EchoMe-AffirmationsTests.xctest */,
 				2AA8CF102E136F5A003B2C59 /* EchoMe-AffirmationsUITests.xctest */,
+				2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */,
+				2AA8CF862E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests.xctest */,
+				2AA8CF902E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		2AA8CF4C2E1427F2003B2C59 /* EchoMe-Affirmations */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF432E1427F2003B2C59 /* EchoMe_Affirmations.entitlements */,
+				2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */,
+				2AA8CF462E1427F2003B2C59 /* GoogleService-Info.plist */,
+				2AA8CF612E142911003B2C59 /* Models */,
+				2AA8CF622E142915003B2C59 /* Views */,
+				2AA8CF632E142918003B2C59 /* ViewModels */,
+				2AA8CF5E2E1428EE003B2C59 /* Services */,
+				2AA8CF5F2E1428FB003B2C59 /* Utilities */,
+				2AA8CF602E142908003B2C59 /* Resources */,
+			);
+			path = "EchoMe-Affirmations";
+			sourceTree = "<group>";
+		};
+		2AA8CF5E2E1428EE003B2C59 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CFAB2E14384C003B2C59 /* Firebase */,
+				2A903DCB2E14710F003FC209 /* Managers */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		2AA8CF5F2E1428FB003B2C59 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		2AA8CF602E142908003B2C59 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF402E1427F2003B2C59 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		2AA8CF612E142911003B2C59 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF642E142935003B2C59 /* User.swift */,
+				2AA8CF662E142943003B2C59 /* Affirmation.swift */,
+				2AA8CF682E142952003B2C59 /* VoiceProfile.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2AA8CF622E142915003B2C59 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF6A2E142978003B2C59 /* Authentication */,
+				2AA8CF6B2E142988003B2C59 /* Onboarding */,
+				2AA8CF6C2E14299B003B2C59 /* Main */,
+				2AA8CF6D2E1429BC003B2C59 /* Favorites */,
+				2AA8CF6E2E1429F6003B2C59 /* Settings */,
+				2AA8CF6F2E142A19003B2C59 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		2AA8CF632E142918003B2C59 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */,
+				2A903DDA2E1473C5003FC209 /* FavoritesManager.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		2AA8CF6A2E142978003B2C59 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF412E1427F2003B2C59 /* AuthenticationView.swift */,
+			);
+			path = Authentication;
+			sourceTree = "<group>";
+		};
+		2AA8CF6B2E142988003B2C59 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF492E1427F2003B2C59 /* OnboardingView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		2AA8CF6C2E14299B003B2C59 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF422E1427F2003B2C59 /* ContentView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		2AA8CF6D2E1429BC003B2C59 /* Favorites */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF452E1427F2003B2C59 /* FavoritesView.swift */,
+			);
+			path = Favorites;
+			sourceTree = "<group>";
+		};
+		2AA8CF6E2E1429F6003B2C59 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF4B2E1427F2003B2C59 /* VoiceSettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		2AA8CF6F2E142A19003B2C59 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		2AA8CFAB2E14384C003B2C59 /* Firebase */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF742E142A96003B2C59 /* FirebaseService.swift */,
+				2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */,
+			);
+			path = Firebase;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -102,16 +407,17 @@
 				2AA8CEF22E136F58003B2C59 /* Sources */,
 				2AA8CEF32E136F58003B2C59 /* Frameworks */,
 				2AA8CEF42E136F58003B2C59 /* Resources */,
+				2AA8CF9E2E142DD0003B2C59 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				2AA8CEF82E136F58003B2C59 /* EchoMe-Affirmations */,
+				2AA8CF992E142DD0003B2C59 /* PBXTargetDependency */,
 			);
 			name = "EchoMe-Affirmations";
 			packageProductDependencies = (
+				2AA8CF262E13718B003B2C59 /* FirebaseAuth */,
+				2AA8CF282E13718B003B2C59 /* FirebaseFirestore */,
 			);
 			productName = "EchoMe-Affirmations";
 			productReference = 2AA8CEF62E136F58003B2C59 /* EchoMe-Affirmations.app */;
@@ -163,6 +469,71 @@
 			productReference = 2AA8CF102E136F5A003B2C59 /* EchoMe-AffirmationsUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		2AA8CF792E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AA8CF9B2E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch App" */;
+			buildPhases = (
+				2AA8CF762E142DCF003B2C59 /* Sources */,
+				2AA8CF772E142DCF003B2C59 /* Frameworks */,
+				2AA8CF782E142DCF003B2C59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "EchoMe-Affirmations Watch App Watch App";
+			packageProductDependencies = (
+			);
+			productName = "EchoMe-Affirmations Watch App Watch App";
+			productReference = 2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2AA8CF852E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AA8CF9F2E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch AppTests" */;
+			buildPhases = (
+				2AA8CF822E142DD0003B2C59 /* Sources */,
+				2AA8CF832E142DD0003B2C59 /* Frameworks */,
+				2AA8CF842E142DD0003B2C59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2AA8CF882E142DD0003B2C59 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2AA8CF892E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests */,
+			);
+			name = "EchoMe-Affirmations Watch App Watch AppTests";
+			packageProductDependencies = (
+			);
+			productName = "EchoMe-Affirmations Watch App Watch AppTests";
+			productReference = 2AA8CF862E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		2AA8CF8F2E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2AA8CFA22E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch AppUITests" */;
+			buildPhases = (
+				2AA8CF8C2E142DD0003B2C59 /* Sources */,
+				2AA8CF8D2E142DD0003B2C59 /* Frameworks */,
+				2AA8CF8E2E142DD0003B2C59 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2AA8CF922E142DD0003B2C59 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				2AA8CF932E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests */,
+			);
+			name = "EchoMe-Affirmations Watch App Watch AppUITests";
+			packageProductDependencies = (
+			);
+			productName = "EchoMe-Affirmations Watch App Watch AppUITests";
+			productReference = 2AA8CF902E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -184,6 +555,17 @@
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = 2AA8CEF52E136F58003B2C59;
 					};
+					2AA8CF792E142DCF003B2C59 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					2AA8CF852E142DD0003B2C59 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 2AA8CF792E142DCF003B2C59;
+					};
+					2AA8CF8F2E142DD0003B2C59 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 2AA8CF792E142DCF003B2C59;
+					};
 				};
 			};
 			buildConfigurationList = 2AA8CEF12E136F58003B2C59 /* Build configuration list for PBXProject "EchoMe-Affirmations" */;
@@ -195,6 +577,9 @@
 			);
 			mainGroup = 2AA8CEED2E136F58003B2C59;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2AA8CF252E13718B003B2C59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2AA8CEF72E136F58003B2C59 /* Products */;
 			projectDirPath = "";
@@ -203,6 +588,9 @@
 				2AA8CEF52E136F58003B2C59 /* EchoMe-Affirmations */,
 				2AA8CF052E136F5A003B2C59 /* EchoMe-AffirmationsTests */,
 				2AA8CF0F2E136F5A003B2C59 /* EchoMe-AffirmationsUITests */,
+				2AA8CF792E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App */,
+				2AA8CF852E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests */,
+				2AA8CF8F2E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -212,6 +600,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AA8CF562E1427F2003B2C59 /* Assets.xcassets in Resources */,
+				2AA8CF572E1427F2003B2C59 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +619,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		2AA8CF782E142DCF003B2C59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A903DD62E147133003FC209 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF842E142DD0003B2C59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF8E2E142DD0003B2C59 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -236,6 +648,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */,
+				2AA8CFAA2E14383C003B2C59 /* Affirmation+Firestore.swift in Sources */,
+				2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */,
+				2AA8CF732E142A83003B2C59 /* AuthenticationManager.swift in Sources */,
+				2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */,
+				2AA8CF4F2E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift in Sources */,
+				2AA8CF502E1427F2003B2C59 /* FavoritesView.swift in Sources */,
+				2AA8CF692E142953003B2C59 /* VoiceProfile.swift in Sources */,
+				2AA8CF522E1427F2003B2C59 /* MockDataProvider.swift in Sources */,
+				2AA8CF532E1427F2003B2C59 /* OnboardingView.swift in Sources */,
+				2AA8CFAF2E1448AB003B2C59 /* WatchConnectivityManager.swift in Sources */,
+				2A903DDB2E1473C9003FC209 /* FavoritesManager.swift in Sources */,
+				2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */,
+				2AA8CF542E1427F2003B2C59 /* SpeechManager.swift in Sources */,
+				2AA8CF712E142A51003B2C59 /* AffirmationCard.swift in Sources */,
+				2AA8CF652E142937003B2C59 /* User.swift in Sources */,
+				2AA8CF552E1427F2003B2C59 /* VoiceSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +676,34 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2AA8CF0C2E136F5A003B2C59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF762E142DCF003B2C59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2AA8CFA52E142F30003B2C59 /* MockDataProvider.swift in Sources */,
+				2AA8CFA62E142F30003B2C59 /* VoiceProfile.swift in Sources */,
+				2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */,
+				2A903DD32E147133003FC209 /* ContentView.swift in Sources */,
+				2A903DD42E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift in Sources */,
+				2A903DD52E147133003FC209 /* WatchConnectivityManager.swift in Sources */,
+				2AA8CFA72E142F30003B2C59 /* Affirmation.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF822E142DD0003B2C59 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2AA8CF8C2E142DD0003B2C59 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -265,6 +722,21 @@
 			isa = PBXTargetDependency;
 			target = 2AA8CEF52E136F58003B2C59 /* EchoMe-Affirmations */;
 			targetProxy = 2AA8CF112E136F5A003B2C59 /* PBXContainerItemProxy */;
+		};
+		2AA8CF882E142DD0003B2C59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AA8CF792E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App */;
+			targetProxy = 2AA8CF872E142DD0003B2C59 /* PBXContainerItemProxy */;
+		};
+		2AA8CF922E142DD0003B2C59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AA8CF792E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App */;
+			targetProxy = 2AA8CF912E142DD0003B2C59 /* PBXContainerItemProxy */;
+		};
+		2AA8CF992E142DD0003B2C59 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2AA8CF792E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App */;
+			targetProxy = 2AA8CF982E142DD0003B2C59 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -553,6 +1025,145 @@
 			};
 			name = Release;
 		};
+		2AA8CF9C2E142DD0003B2C59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "EchoMe-Affirmations Watch App";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "MazilePlay.EchoMe-Affirmations";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		2AA8CF9D2E142DD0003B2C59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "EchoMe-Affirmations Watch App";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "MazilePlay.EchoMe-Affirmations";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		2AA8CFA02E142DD0003B2C59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations-Watch-App-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EchoMe-Affirmations Watch App Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EchoMe-Affirmations Watch App Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		2AA8CFA12E142DD0003B2C59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations-Watch-App-Watch-AppTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EchoMe-Affirmations Watch App Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/EchoMe-Affirmations Watch App Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
+		2AA8CFA32E142DD0003B2C59 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations-Watch-App-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "EchoMe-Affirmations Watch App Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Debug;
+		};
+		2AA8CFA42E142DD0003B2C59 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 888WYS3UC6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "MazilePlay.EchoMe-Affirmations-Watch-App-Watch-AppUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_TARGET_NAME = "EchoMe-Affirmations Watch App Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 11.5;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -592,7 +1203,58 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		2AA8CF9B2E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AA8CF9C2E142DD0003B2C59 /* Debug */,
+				2AA8CF9D2E142DD0003B2C59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AA8CF9F2E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch AppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AA8CFA02E142DD0003B2C59 /* Debug */,
+				2AA8CFA12E142DD0003B2C59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		2AA8CFA22E142DD0003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations Watch App Watch AppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AA8CFA32E142DD0003B2C59 /* Debug */,
+				2AA8CFA42E142DD0003B2C59 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2AA8CF252E13718B003B2C59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2AA8CF262E13718B003B2C59 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AA8CF252E13718B003B2C59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		2AA8CF282E13718B003B2C59 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AA8CF252E13718B003B2C59 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2AA8CEEE2E136F58003B2C59 /* Project object */;
 }
