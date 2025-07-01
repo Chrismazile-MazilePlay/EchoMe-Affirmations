@@ -15,241 +15,147 @@ class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
     
     // Observable properties
-    var affirmations: [Affirmation] = []
-    var userCategories: [String] = []
-    var favoriteIds: Set<String> = []  // Track favorite IDs
+    var affirmations: [(id: String, text: String)] = []
+    var favoriteIds: Set<String> = []
     var lastSyncDate: Date?
-    var isConnected = false
+    var isReachable = false
     
-    private var session: WCSession?
+    private let session = WCSession.default
     
-    override init() {
+    private override init() {
         super.init()
-        setupSession()
-        loadCachedData()
     }
     
-    private func setupSession() {
+    func startSession() {
         if WCSession.isSupported() {
-            session = WCSession.default
-            session?.delegate = self
-            session?.activate()
+            session.delegate = self
+            session.activate()
         }
     }
     
-    // Toggle favorite and sync with iPhone
-    func toggleFavorite(affirmationId: String, affirmationText: String, isFavorite: Bool) {
-        print("⌚ Toggling favorite: \(affirmationId) - \(isFavorite)")
-        
-        // Update local state
-        if isFavorite {
-            favoriteIds.insert(affirmationId)
-        } else {
-            favoriteIds.remove(affirmationId)
+    func requestAffirmations() {
+        guard session.isReachable else {
+            print("⌚ iPhone not reachable")
+            return
         }
         
-        // Save locally
-        saveFavoriteIds()
+        session.sendMessage(
+            ["request": "affirmations"],
+            replyHandler: { response in
+                print("⌚ Received response: \(response)")
+            },
+            errorHandler: { error in
+                print("⌚ Error requesting affirmations: \(error)")
+            }
+        )
+    }
+    
+    func toggleFavorite(affirmationId: String, affirmationText: String) {
+        // Toggle local state immediately for responsive UI
+        let wasFavorite = favoriteIds.contains(affirmationId)
+        
+        if wasFavorite {
+            favoriteIds.remove(affirmationId)
+        } else {
+            favoriteIds.insert(affirmationId)
+        }
         
         // Send to iPhone
-        guard let session = session else { return }
-        
         let message: [String: Any] = [
             "type": "favoriteToggle",
             "affirmationId": affirmationId,
             "affirmationText": affirmationText,
-            "isFavorite": isFavorite,
-            "timestamp": Date()
+            "isFavorite": !wasFavorite
         ]
         
         if session.isReachable {
-            session.sendMessage(message, replyHandler: { response in
-                print("✅ Watch: iPhone acknowledged favorite toggle")
-            }) { error in
-                print("❌ Watch: Error sending favorite toggle: \(error)")
-            }
-        } else {
-            // Queue for later if iPhone not reachable
-            do {
-                var context = session.applicationContext
-                var queuedFavorites = context["queuedFavorites"] as? [[String: Any]] ?? []
-                queuedFavorites.append(message)
-                context["queuedFavorites"] = queuedFavorites
-                try session.updateApplicationContext(context)
-            } catch {
-                print("❌ Watch: Failed to queue favorite: \(error)")
+            session.sendMessage(message, replyHandler: nil) { error in
+                print("⌚ Error sending favorite toggle: \(error)")
+                // Revert on error
+                if wasFavorite {
+                    self.favoriteIds.insert(affirmationId)
+                } else {
+                    self.favoriteIds.remove(affirmationId)
+                }
             }
         }
     }
     
-    // Request affirmations from iPhone
-    func requestAffirmations() {
-        print("⌚ Requesting affirmations from iPhone")
-        
-        guard let session = session else {
-            print("❌ Watch: No session available")
-            return
-        }
-        
-        print("⌚ Session activation state: \(session.activationState.rawValue)")
-        print("⌚ Session reachable: \(session.isReachable)")
-        
-        if session.isReachable {
-            let message = ["request": "affirmations"]
-            session.sendMessage(message, replyHandler: { response in
-                print("✅ Watch: iPhone responded: \(response)")
-            }) { error in
-                print("❌ Watch: Error requesting: \(error)")
+    private func updateFavoriteIds(_ ids: [String]) {
+        favoriteIds = Set(ids)
+        print("⌚ Updated favorite IDs: \(ids.count)")
+    }
+    
+    private func handleAffirmationsUpdate(_ data: [String: Any]) {
+        if let affirmationData = data["data"] as? [[String: Any]] {
+            let newAffirmations = affirmationData.compactMap { dict -> (id: String, text: String)? in
+                guard let id = dict["id"] as? String,
+                      let text = dict["text"] as? String else { return nil }
+                return (id: id, text: text)
             }
-        } else {
-            print("⌚ iPhone not reachable, checking for cached context")
-            let context = session.receivedApplicationContext
-            if let type = context["type"] as? String, type == "affirmations" {
-                handleAffirmationsMessage(context)
-            }
-        }
-    }
-    
-    // Save data locally
-    private func saveDataLocally() {
-        let encoder = JSONEncoder()
-        
-        if let affirmationData = try? encoder.encode(affirmations) {
-            UserDefaults.standard.set(affirmationData, forKey: "cachedAffirmations")
-        }
-        
-        UserDefaults.standard.set(userCategories, forKey: "cachedCategories")
-        UserDefaults.standard.set(lastSyncDate, forKey: "lastSyncDate")
-        saveFavoriteIds()
-    }
-    
-    private func saveFavoriteIds() {
-        UserDefaults.standard.set(Array(favoriteIds), forKey: "favoriteIds")
-    }
-    
-    private func loadCachedData() {
-        let decoder = JSONDecoder()
-        
-        if let affirmationData = UserDefaults.standard.data(forKey: "cachedAffirmations"),
-           let cached = try? decoder.decode([Affirmation].self, from: affirmationData) {
-            self.affirmations = cached
-            print("⌚ Loaded \(cached.count) cached affirmations")
-        }
-        
-        if let categories = UserDefaults.standard.stringArray(forKey: "cachedCategories") {
-            self.userCategories = categories
-        }
-        
-        if let savedFavorites = UserDefaults.standard.stringArray(forKey: "favoriteIds") {
-            self.favoriteIds = Set(savedFavorites)
-        }
-        
-        self.lastSyncDate = UserDefaults.standard.object(forKey: "lastSyncDate") as? Date
-    }
-    
-    // Handle received messages
-    private func handleAffirmationsMessage(_ message: [String: Any]) {
-        print("⌚ Processing affirmations message")
-        guard let data = message["data"] as? [[String: Any]] else {
-            print("❌ Watch: No data in message")
-            return
-        }
-        
-        let newAffirmations = data.compactMap { dict -> Affirmation? in
-            guard let id = dict["id"] as? String,
-                  let text = dict["text"] as? String else { return nil }
             
-            return Affirmation(
-                id: id,
-                text: text,
-                categories: dict["categories"] as? [String] ?? [],
-                tone: dict["tone"] as? String ?? "gentle",
-                length: dict["length"] as? String ?? "short"
-            )
+            self.affirmations = newAffirmations
+            self.lastSyncDate = Date()
+            print("⌚ Updated affirmations: \(newAffirmations.count)")
         }
         
-        print("⌚ Received \(newAffirmations.count) affirmations")
-        self.affirmations = newAffirmations
-        self.lastSyncDate = Date()
-        saveDataLocally()
-    }
-    
-    private func handlePreferencesMessage(_ message: [String: Any]) {
-        if let categories = message["categories"] as? [String] {
-            self.userCategories = categories
+        // Also update favorite IDs if present
+        if let favoriteIds = data["favoriteIds"] as? [String] {
+            updateFavoriteIds(favoriteIds)
         }
-        
-        if let favoriteIdArray = message["favoriteIds"] as? [String] {
-            self.favoriteIds = Set(favoriteIdArray)
-            print("⌚ Updated favorite IDs: \(favoriteIds.count) favorites")
-        }
-        
-        saveDataLocally()
     }
 }
 
 // MARK: - WCSessionDelegate
 extension WatchConnectivityManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        print("⌚ Session activation completed with state: \(activationState.rawValue)")
-        if let error = error {
-            print("❌ Watch activation error: \(error)")
-        }
-        
-        if activationState == .activated {
-            Task { @MainActor in
-                self.isConnected = session.isReachable
+        Task { @MainActor in
+            if activationState == .activated {
+                self.isReachable = session.isReachable
                 print("⌚ Session activated, reachable: \(session.isReachable)")
-                
-                let context = session.receivedApplicationContext
-                if let type = context["type"] as? String, type == "affirmations" {
-                    print("⌚ Found cached context on activation")
-                    self.handleAffirmationsMessage(context)
-                } else {
-                    self.requestAffirmations()
-                }
-            }
-        }
-    }
-    
-    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        print("⌚ Received message: \(message["type"] ?? "unknown")")
-        Task { @MainActor in
-            if let type = message["type"] as? String {
-                switch type {
-                case "affirmations":
-                    self.handleAffirmationsMessage(message)
-                case "preferences":
-                    self.handlePreferencesMessage(message)
-                case "favoriteUpdate":
-                    // Handle favorite updates from iPhone
-                    if let favoriteIds = message["favoriteIds"] as? [String] {
-                        self.favoriteIds = Set(favoriteIds)
-                        self.saveFavoriteIds()
-                    }
-                default:
-                    print("⌚ Unknown message type: \(type)")
-                }
-            }
-        }
-    }
-    
-    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        print("⌚ Received application context update")
-        Task { @MainActor in
-            if let type = applicationContext["type"] as? String, type == "affirmations" {
-                self.handleAffirmationsMessage(applicationContext)
             }
         }
     }
     
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         Task { @MainActor in
-            self.isConnected = session.isReachable
-            print("⌚ Reachability changed to: \(session.isReachable)")
-            
-            if session.isReachable {
-                self.requestAffirmations()
+            self.isReachable = session.isReachable
+            print("⌚ Reachability changed: \(session.isReachable)")
+        }
+    }
+    
+    // Handle messages from iPhone
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+        Task { @MainActor in
+            if let type = message["type"] as? String {
+                switch type {
+                case "favoriteIds":
+                    if let ids = message["favoriteIds"] as? [String] {
+                        self.updateFavoriteIds(ids)
+                    }
+                case "affirmations":
+                    self.handleAffirmationsUpdate(message)
+                default:
+                    break
+                }
+            }
+        }
+    }
+    
+    // Handle application context updates (for when watch wasn't reachable)
+    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
+        Task { @MainActor in
+            if let type = applicationContext["type"] as? String {
+                switch type {
+                case "favoriteIds":
+                    if let ids = applicationContext["favoriteIds"] as? [String] {
+                        self.updateFavoriteIds(ids)
+                    }
+                case "affirmations":
+                    self.handleAffirmationsUpdate(applicationContext)
+                default:
+                    break
+                }
             }
         }
     }

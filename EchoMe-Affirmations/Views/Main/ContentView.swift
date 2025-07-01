@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  EchoMe-Affirmations
-//
-//  Created by Christopher Mazile on 6/30/25.
-//
-
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -184,10 +177,6 @@ struct ContentView: View {
     private func sendAffirmationsToWatch() {
         print("📱 Sending \(affirmations.count) affirmations to watch")
         watchConnectivity.sendAffirmationsToWatch(affirmations)
-        watchConnectivity.sendPreferencesToWatch(
-            categories: userCategories,
-            voiceProfile: "Calm & Clear"
-        )
     }
 }
 

@@ -20,6 +20,7 @@ class FavoritesManager {
     var isListening = false
     
     private var favoritesListener: ListenerRegistration?
+    private let watchConnectivity = WatchConnectivityManager.shared
     
     private init() {}
     
@@ -50,6 +51,9 @@ class FavoritesManager {
                 Task { @MainActor in
                     self.favoriteIds = ids
                     print("💖 Updated favorites: \(ids.count) items")
+                    
+                    // Send updated favorites to Watch
+                    self.watchConnectivity.sendFavoriteIds(Array(ids))
                 }
             }
     }
@@ -66,7 +70,7 @@ class FavoritesManager {
         return favoriteIds.contains(affirmationId)
     }
     
-    // Toggle favorite (called from AffirmationCard)
+    // Toggle favorite
     func toggleFavorite(affirmationId: String, affirmationText: String, completion: ((Bool) -> Void)? = nil) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         
@@ -80,6 +84,7 @@ class FavoritesManager {
             favoriteRef.delete { error in
                 if error == nil {
                     completion?(false)
+                    print("💔 Removed from favorites")
                 }
             }
         } else {
@@ -91,6 +96,7 @@ class FavoritesManager {
             ]) { error in
                 if error == nil {
                     completion?(true)
+                    print("💖 Added to favorites")
                 }
             }
         }

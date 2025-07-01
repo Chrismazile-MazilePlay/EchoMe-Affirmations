@@ -8,7 +8,7 @@
 import Foundation
 
 struct Affirmation: Identifiable, Codable, Equatable {
-    var id: String?
+    var id: String
     let text: String
     let categories: [String]
     let tone: String
@@ -29,7 +29,7 @@ struct Affirmation: Identifiable, Codable, Equatable {
     
     // For creating new affirmations
     init(
-        id: String? = nil,
+        id: String = UUID().uuidString,
         text: String,
         categories: [String] = [],
         tone: String = "gentle",

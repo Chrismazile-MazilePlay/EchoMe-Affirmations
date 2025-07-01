@@ -16,126 +16,37 @@ import Observation
 class WatchConnectivityManager: NSObject {
     static let shared = WatchConnectivityManager()
     
+    // Observable properties
     var isReachable = false
-    private var session: WCSession?
+    var isPaired = false
+    var isWatchAppInstalled = false
     
-    override init() {
+    private let session: WCSession
+    
+    private override init() {
+        self.session = WCSession.default
         super.init()
-        setupSession()
-    }
-    
-    private func setupSession() {
+        
         if WCSession.isSupported() {
-            session = WCSession.default
-            session?.delegate = self
-            session?.activate()
+            session.delegate = self
+            session.activate()
         }
     }
     
-    // Send affirmations and favorites to watch
+    // Send affirmations to watch
     func sendAffirmationsToWatch(_ affirmations: [Affirmation]) {
-        print("📱 WatchConnectivity - Attempting to send affirmations")
-        print("📱 Session supported: \(WCSession.isSupported())")
-        print("📱 Session reachable: \(session?.isReachable ?? false)")
+        guard session.activationState == .activated else { return }
         
-        guard let session = session else {
-            print("❌ No session available")
-            return
+        let affirmationData = affirmations.map { affirmation in
+            [
+                "id": affirmation.id,
+                "text": affirmation.text,
+                "categories": affirmation.categories
+            ]
         }
         
         // Get current favorite IDs
-        Task {
-            let favoriteIds = await getFavoriteIds()
-            
-            if session.isReachable {
-                sendViaMessage(affirmations, favoriteIds: favoriteIds)
-            } else {
-                sendViaApplicationContext(affirmations, favoriteIds: favoriteIds)
-            }
-        }
-    }
-    
-    private func sendViaMessage(_ affirmations: [Affirmation], favoriteIds: [String]) {
-        guard let session = session else { return }
-        
-        let affirmationData = affirmations.prefix(5).map { affirmation in
-            [
-                "id": affirmation.id ?? UUID().uuidString,
-                "text": affirmation.text,
-                "categories": affirmation.categories
-            ]
-        }
-        
-        let message: [String: Any] = [
-            "type": "affirmations",
-            "data": affirmationData,
-            "timestamp": Date()
-        ]
-        
-        session.sendMessage(message, replyHandler: { response in
-            print("✅ Watch acknowledged: \(response)")
-        }) { error in
-            print("❌ Error sending to watch: \(error)")
-            self.sendViaApplicationContext(affirmations, favoriteIds: favoriteIds)
-        }
-    }
-    
-    // Send user preferences including favorites
-    func sendPreferencesToWatch(categories: [String], voiceProfile: String) {
-        print("📱 Sending preferences to watch")
-        
-        guard let session = session else {
-            print("❌ No session for preferences")
-            return
-        }
-        
-        Task {
-            let favoriteIds = await getFavoriteIds()
-            
-            if session.isReachable {
-                let message: [String: Any] = [
-                    "type": "preferences",
-                    "categories": categories,
-                    "voiceProfile": voiceProfile,
-                    "favoriteIds": favoriteIds
-                ]
-                
-                session.sendMessage(message, replyHandler: nil) { error in
-                    print("❌ Error sending preferences: \(error)")
-                }
-            }
-        }
-    }
-    
-    // Get current favorite IDs from Firestore
-    private func getFavoriteIds() async -> [String] {
-        guard let userId = Auth.auth().currentUser?.uid else { return [] }
-        
-        do {
-            let snapshot = try await Firestore.firestore()
-                .collection("users")
-                .document(userId)
-                .collection("favorites")
-                .getDocuments()
-            
-            return snapshot.documents.map { $0.documentID }
-        } catch {
-            print("❌ Error fetching favorite IDs: \(error)")
-            return []
-        }
-    }
-    
-    // Backup method using application context
-    private func sendViaApplicationContext(_ affirmations: [Affirmation], favoriteIds: [String]) {
-        guard let session = session else { return }
-        
-        let affirmationData = affirmations.prefix(5).map { affirmation in
-            [
-                "id": affirmation.id ?? UUID().uuidString,
-                "text": affirmation.text,
-                "categories": affirmation.categories
-            ]
-        }
+        let favoriteIds = Array(FavoritesManager.shared.favoriteIds)
         
         let context: [String: Any] = [
             "type": "affirmations",
@@ -146,9 +57,36 @@ class WatchConnectivityManager: NSObject {
         
         do {
             try session.updateApplicationContext(context)
-            print("✅ Sent via application context")
+            print("✅ Sent affirmations and favorites via context")
         } catch {
             print("❌ Failed to update application context: \(error)")
+        }
+    }
+    
+    // Send favorite IDs to Watch
+    func sendFavoriteIds(_ favoriteIds: [String]) {
+        guard session.activationState == .activated else { return }
+        
+        // Send via immediate message if reachable
+        if session.isReachable {
+            session.sendMessage([
+                "type": "favoriteIds",
+                "favoriteIds": favoriteIds
+            ], replyHandler: nil) { error in
+                print("❌ Failed to send favorite IDs: \(error)")
+            }
+        }
+        
+        // Always update context for persistence
+        do {
+            try session.updateApplicationContext([
+                "type": "favoriteIds",
+                "favoriteIds": favoriteIds,
+                "timestamp": Date().timeIntervalSince1970
+            ])
+            print("✅ Updated favorite IDs in context")
+        } catch {
+            print("❌ Failed to update context: \(error)")
         }
     }
     
@@ -157,19 +95,13 @@ class WatchConnectivityManager: NSObject {
         guard let affirmationId = message["affirmationId"] as? String,
               let affirmationText = message["affirmationText"] as? String,
               let isFavorite = message["isFavorite"] as? Bool,
-              let userId = Auth.auth().currentUser?.uid else {
-            print("❌ Invalid favorite toggle message")
-            return
-        }
-        
-        print("📱 Processing favorite toggle: \(affirmationId) - \(isFavorite)")
+              let userId = Auth.auth().currentUser?.uid else { return }
         
         let db = Firestore.firestore()
         let favoriteRef = db.collection("users").document(userId)
             .collection("favorites").document(affirmationId)
         
         if isFavorite {
-            // Add to favorites
             favoriteRef.setData([
                 "affirmationId": affirmationId,
                 "text": affirmationText,
@@ -179,50 +111,24 @@ class WatchConnectivityManager: NSObject {
                     print("❌ Error adding favorite: \(error)")
                 } else {
                     print("✅ Added to favorites - Firestore listeners will update UI")
-                    // The FavoritesManager will automatically detect this change
-                    self.sendUpdatedFavoritesToWatch()
                 }
             }
         } else {
-            // Remove from favorites
             favoriteRef.delete { error in
                 if let error = error {
                     print("❌ Error removing favorite: \(error)")
                 } else {
                     print("✅ Removed from favorites - Firestore listeners will update UI")
-                    // The FavoritesManager will automatically detect this change
-                    self.sendUpdatedFavoritesToWatch()
                 }
             }
         }
     }
     
-    // Send updated favorites list back to watch
-    private func sendUpdatedFavoritesToWatch() {
-        Task {
-            let favoriteIds = await getFavoriteIds()
-            
-            guard let session = session, session.isReachable else { return }
-            
-            let message: [String: Any] = [
-                "type": "favoriteUpdate",
-                "favoriteIds": favoriteIds
-            ]
-            
-            session.sendMessage(message, replyHandler: nil) { error in
-                print("❌ Error sending favorite update: \(error)")
-            }
-        }
-    }
-    
-    // Handle requests from watch
+    // Handle watch requests
     private func handleWatchRequest(_ message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         if let request = message["request"] as? String, request == "affirmations" {
             print("📱 Watch requested affirmations")
             replyHandler(["status": "acknowledged"])
-            
-            // Trigger a refresh - you might want to notify ContentView to refresh
-            // For now, just acknowledge
         }
     }
 }
@@ -234,6 +140,8 @@ extension WatchConnectivityManager: WCSessionDelegate {
             print("📱 Session activation: \(activationState.rawValue)")
             if activationState == .activated {
                 self.isReachable = session.isReachable
+                self.isPaired = session.isPaired
+                self.isWatchAppInstalled = session.isWatchAppInstalled
             }
         }
     }

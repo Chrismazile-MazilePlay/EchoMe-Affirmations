@@ -125,9 +125,7 @@ struct AffirmationWatchView: View {
         // Send favorite update to iPhone
         connectivityManager.toggleFavorite(
             affirmationId: affirmation.id ?? "",
-            affirmationText: affirmation.text,
-            isFavorite: isFavorite
-        )
+            affirmationText: affirmation.text )
     }
     
     private func loadFavoriteStatus() {

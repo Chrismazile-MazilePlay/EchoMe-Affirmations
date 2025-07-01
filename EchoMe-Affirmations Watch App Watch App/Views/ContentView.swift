@@ -13,113 +13,107 @@ struct ContentView: View {
     @State private var isLoading = true
     
     var body: some View {
-        contentView
-            .onAppear {
-                handleOnAppear()
-            }
+        NavigationStack {
+            contentView
+                .navigationTitle("EchoMe")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    if let syncDate = connectivityManager.lastSyncDate {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            VStack(spacing: 2) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption2)
+                                Text(syncDate, style: .time)
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
+        }
+        .onAppear {
+            connectivityManager.startSession()
+            loadAffirmations()
+        }
     }
     
-    // Break down complex views into separate computed properties
     @ViewBuilder
     private var contentView: some View {
-        if isLoading && !MockDataProvider.isPreview {
-            loadingView
-        } else if currentAffirmations.isEmpty && !MockDataProvider.isPreview {
-            emptyStateView
-        } else {
-            affirmationsView
-        }
-    }
-    
-    private var loadingView: some View {
-        VStack {
+        if isLoading {
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle())
-            Text("Loading...")
-                .font(.caption2)
-                .foregroundColor(.gray)
-        }
-    }
-    
-    private var emptyStateView: some View {
-        VStack(spacing: 8) {
-            Image(systemName: connectivityManager.isConnected ? "iphone.gen3" : "iphone.slash")
-                .font(.system(size: 40))
-                .foregroundColor(connectivityManager.isConnected ? .blue : .gray)
-            
-            Text(emptyStateMessage)
-                .font(.caption)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            Button(action: {
-                connectivityManager.requestAffirmations()
-            }) {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.caption)
-                    Text("Refresh")
-                        .font(.caption)
+        } else if connectivityManager.affirmations.isEmpty {
+            VStack(spacing: 10) {
+                Image(systemName: "quote.bubble")
+                    .font(.system(size: 30))
+                    .foregroundColor(.gray)
+                Text("No affirmations")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                Button("Request from iPhone") {
+                    connectivityManager.requestAffirmations()
+                }
+                .buttonStyle(.borderedProminent)
+            }
+        } else {
+            TabView(selection: $currentIndex) {
+                ForEach(Array(connectivityManager.affirmations.enumerated()), id: \.element.id) { index, affirmation in
+                    VStack(spacing: 15) {
+                        Text(affirmation.text)
+                            .font(.body)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                toggleFavorite(affirmation)
+                            }) {
+                                Image(systemName: isFavorite(affirmation.id) ? "heart.fill" : "heart")
+                                    .font(.title2)
+                                    .foregroundColor(isFavorite(affirmation.id) ? .red : .gray)
+                            }
+                            .buttonStyle(.plain)
+                            
+                            Button(action: {
+                                // Placeholder for share
+                            }) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.title2)
+                                    .foregroundColor(.gray)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.top, 10)
+                    }
+                    .tag(index)
                 }
             }
-            .buttonStyle(BorderedButtonStyle(tint: .blue))
-            .controlSize(.small)
-        }
-        .padding()
-    }
-    
-    private var affirmationsView: some View {
-        TabView(selection: $currentIndex) {
-            ForEach(affirmationsWithIndex, id: \.0) { index, affirmation in
-                AffirmationWatchView(
-                    affirmation: affirmation,
-                    index: index + 1,
-                    total: currentAffirmations.count,
-                    showSyncStatus: connectivityManager.lastSyncDate != nil || MockDataProvider.isPreview
-                )
-                .tag(index)
-            }
-        }
-        .tabViewStyle(PageTabViewStyle())
-    }
-    
-    // Helper computed properties
-    private var currentAffirmations: [Affirmation] {
-        if MockDataProvider.isPreview {
-            return MockDataProvider.shared.getDailyAffirmations(count: 3)
-        } else {
-            return connectivityManager.affirmations
+            .tabViewStyle(.verticalPage)
         }
     }
     
-    private var affirmationsWithIndex: [(Int, Affirmation)] {
-        Array(currentAffirmations.enumerated())
-    }
-    
-    private var emptyStateMessage: String {
-        if connectivityManager.affirmations.isEmpty && connectivityManager.lastSyncDate != nil {
-            return "Tap refresh to load"
-        }
-        return connectivityManager.isConnected ? "Waiting for affirmations" : "Open EchoMe on iPhone"
-    }
-    
-    // Helper methods
-    private func handleOnAppear() {
-        if MockDataProvider.isPreview {
-            loadMockData()
-        } else {
+    private func loadAffirmations() {
+        // Initial data will come from iPhone via WatchConnectivity
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             isLoading = false
             if connectivityManager.affirmations.isEmpty {
+                // Request from iPhone if no data
                 connectivityManager.requestAffirmations()
             }
         }
     }
     
-    private func loadMockData() {
-        MockDataProvider.simulateLoading(seconds: 0.3) {
-            self.isLoading = false
-        }
+    private func isFavorite(_ affirmationId: String) -> Bool {
+        return connectivityManager.favoriteIds.contains(affirmationId)
+    }
+    
+    private func toggleFavorite(_ affirmation: (id: String, text: String)) {
+        // Toggle favorite through connectivity manager
+        connectivityManager.toggleFavorite(
+            affirmationId: affirmation.id,
+            affirmationText: affirmation.text
+        )
     }
 }
 
