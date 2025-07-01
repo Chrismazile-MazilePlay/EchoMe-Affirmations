@@ -39,7 +39,7 @@ struct FavoritesView: View {
                         VStack(spacing: 15) {
                             ForEach(favorites) { favorite in
                                 AffirmationCard(
-                                    id: favorite.id ?? "",
+                                    id: favorite.id,
                                     text: favorite.text
                                 )
                             }

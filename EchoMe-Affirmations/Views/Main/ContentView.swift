@@ -52,7 +52,7 @@ struct ContentView: View {
                             VStack(spacing: 15) {
                                 ForEach(affirmations) { affirmation in
                                     AffirmationCard(
-                                        id: affirmation.id ?? "",
+                                        id: affirmation.id,
                                         text: affirmation.text
                                     )
                                 }

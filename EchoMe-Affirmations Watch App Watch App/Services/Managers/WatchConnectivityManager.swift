@@ -11,28 +11,26 @@ import Observation
 
 @Observable
 @MainActor
-class WatchConnectivityManager: NSObject {
+class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProtocol {
     static let shared = WatchConnectivityManager()
     
-    // Observable properties
-    var affirmations: [(id: String, text: String)] = []
+    // MARK: - Observable Properties
+    var affirmations: [Affirmation] = []
     var favoriteIds: Set<String> = []
     var lastSyncDate: Date?
     var isReachable = false
     
-    private let session = WCSession.default
+    // MARK: - WatchConnectivityProtocol
+    let session = WCSession.default
     
     private override init() {
         super.init()
+        startSession()
     }
     
-    func startSession() {
-        if WCSession.isSupported() {
-            session.delegate = self
-            session.activate()
-        }
-    }
+    // MARK: - Public Methods
     
+    /// Request affirmations from iPhone
     func requestAffirmations() {
         guard session.isReachable else {
             print("⌚ iPhone not reachable")
@@ -40,7 +38,7 @@ class WatchConnectivityManager: NSObject {
         }
         
         session.sendMessage(
-            ["request": "affirmations"],
+            [WatchMessageKey.request: WatchMessageType.requestAffirmations],
             replyHandler: { response in
                 print("⌚ Received response: \(response)")
             },
@@ -50,6 +48,7 @@ class WatchConnectivityManager: NSObject {
         )
     }
     
+    /// Toggle favorite status
     func toggleFavorite(affirmationId: String, affirmationText: String) {
         // Toggle local state immediately for responsive UI
         let wasFavorite = favoriteIds.contains(affirmationId)
@@ -62,36 +61,70 @@ class WatchConnectivityManager: NSObject {
         
         // Send to iPhone
         let message: [String: Any] = [
-            "type": "favoriteToggle",
-            "affirmationId": affirmationId,
-            "affirmationText": affirmationText,
-            "isFavorite": !wasFavorite
+            WatchMessageType.type: WatchMessageType.favoriteToggle,
+            WatchMessageKey.affirmationId: affirmationId,
+            WatchMessageKey.affirmationText: affirmationText,
+            WatchMessageKey.isFavorite: !wasFavorite
         ]
         
         if session.isReachable {
-            session.sendMessage(message, replyHandler: nil) { error in
+            session.sendMessage(message, replyHandler: nil) { [weak self] error in
                 print("⌚ Error sending favorite toggle: \(error)")
                 // Revert on error
-                if wasFavorite {
-                    self.favoriteIds.insert(affirmationId)
-                } else {
-                    self.favoriteIds.remove(affirmationId)
+                Task { @MainActor in
+                    if wasFavorite {
+                        self?.favoriteIds.insert(affirmationId)
+                    } else {
+                        self?.favoriteIds.remove(affirmationId)
+                    }
                 }
             }
         }
     }
     
+    // MARK: - WatchConnectivityProtocol Methods
+    
+    /// Send favorite IDs (Watch doesn't send IDs, it receives them)
+    func sendFavoriteIds(_ favoriteIds: [String]) {
+        // This is receive-only on Watch side
+        self.favoriteIds = Set(favoriteIds)
+        print("⌚ Updated favorite IDs: \(favoriteIds.count)")
+    }
+    
+    /// Handle favorite toggle (not used on Watch side)
+    func handleFavoriteToggle(_ message: [String: Any]) {
+        // Watch sends toggles, doesn't receive them
+    }
+    
+    // MARK: - Private Methods
+    
+    /// Update favorite IDs from iPhone
     private func updateFavoriteIds(_ ids: [String]) {
         favoriteIds = Set(ids)
         print("⌚ Updated favorite IDs: \(ids.count)")
     }
     
+    /// Handle affirmations update from iPhone
     private func handleAffirmationsUpdate(_ data: [String: Any]) {
-        if let affirmationData = data["data"] as? [[String: Any]] {
-            let newAffirmations = affirmationData.compactMap { dict -> (id: String, text: String)? in
+        if let affirmationData = data[WatchMessageKey.data] as? [[String: Any]] {
+            let newAffirmations = affirmationData.compactMap { dict -> Affirmation? in
                 guard let id = dict["id"] as? String,
                       let text = dict["text"] as? String else { return nil }
-                return (id: id, text: text)
+                
+                let categories = dict["categories"] as? [String] ?? []
+                let tone = dict["tone"] as? String ?? "gentle"
+                let length = dict["length"] as? String ?? "short"
+                let isActive = dict["isActive"] as? Bool ?? true
+                
+                return Affirmation(
+                    id: id,
+                    text: text,
+                    categories: categories,
+                    tone: tone,
+                    length: length,
+                    isActive: isActive,
+                    createdAt: nil
+                )
             }
             
             self.affirmations = newAffirmations
@@ -100,7 +133,7 @@ class WatchConnectivityManager: NSObject {
         }
         
         // Also update favorite IDs if present
-        if let favoriteIds = data["favoriteIds"] as? [String] {
+        if let favoriteIds = data[WatchMessageType.favoriteIds] as? [String] {
             updateFavoriteIds(favoriteIds)
         }
     }
@@ -127,13 +160,13 @@ extension WatchConnectivityManager: WCSessionDelegate {
     // Handle messages from iPhone
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         Task { @MainActor in
-            if let type = message["type"] as? String {
+            if let type = message[WatchMessageType.type] as? String {
                 switch type {
-                case "favoriteIds":
-                    if let ids = message["favoriteIds"] as? [String] {
+                case WatchMessageType.favoriteIds:
+                    if let ids = message[WatchMessageType.favoriteIds] as? [String] {
                         self.updateFavoriteIds(ids)
                     }
-                case "affirmations":
+                case WatchMessageType.affirmations:
                     self.handleAffirmationsUpdate(message)
                 default:
                     break
@@ -145,13 +178,13 @@ extension WatchConnectivityManager: WCSessionDelegate {
     // Handle application context updates (for when watch wasn't reachable)
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
         Task { @MainActor in
-            if let type = applicationContext["type"] as? String {
+            if let type = applicationContext[WatchMessageType.type] as? String {
                 switch type {
-                case "favoriteIds":
-                    if let ids = applicationContext["favoriteIds"] as? [String] {
+                case WatchMessageType.favoriteIds:
+                    if let ids = applicationContext[WatchMessageType.favoriteIds] as? [String] {
                         self.updateFavoriteIds(ids)
                     }
-                case "affirmations":
+                case WatchMessageType.affirmations:
                     self.handleAffirmationsUpdate(applicationContext)
                 default:
                     break

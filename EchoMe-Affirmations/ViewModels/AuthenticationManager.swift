@@ -17,7 +17,8 @@ class AuthenticationManager {
     // MARK: - Properties
     var isAuthenticated = false
     var hasCompletedOnboarding = false
-    var currentUser: User?
+    var currentUser: FirebaseAuth.User?  // Firebase auth user
+    var userProfile: User?  // Our custom user model
     var isLoading = false
     var errorMessage: String?
     
@@ -33,6 +34,12 @@ class AuthenticationManager {
         let manager = AuthenticationManager(isPreview: true)
         manager.isAuthenticated = true
         manager.hasCompletedOnboarding = true
+        manager.userProfile = User(
+            id: "preview-user",
+            email: "preview@example.com",
+            displayName: "Preview User",
+            preferences: UserPreferences(categories: ["motivation", "confidence"])
+        )
         return manager
     }()
     
@@ -70,6 +77,7 @@ class AuthenticationManager {
                 } else {
                     self?.userProfileListener?.remove()
                     self?.hasCompletedOnboarding = false
+                    self?.userProfile = nil
                 }
             }
         }
@@ -85,10 +93,46 @@ class AuthenticationManager {
         userProfileListener = db.collection("users").document(userId)
             .addSnapshotListener { [weak self] snapshot, error in
                 Task { @MainActor in
-                    if let data = snapshot?.data(),
-                       let completed = data["onboardingCompleted"] as? Bool {
-                        self?.hasCompletedOnboarding = completed
+                    guard let self = self else { return }
+                    
+                    if let error = error {
+                        print("Error listening to user profile: \(error)")
+                        return
                     }
+                    
+                    guard let data = snapshot?.data() else {
+                        self.hasCompletedOnboarding = false
+                        self.userProfile = nil
+                        return
+                    }
+                    
+                    // Update onboarding status
+                    self.hasCompletedOnboarding = data["onboardingCompleted"] as? Bool ?? false
+                    
+                    // Parse preferences
+                    let preferencesData = data["preferences"] as? [String: Any] ?? [:]
+                    let preferences = UserPreferences(
+                        categories: preferencesData["categories"] as? [String] ?? [],
+                        voiceProfile: preferencesData["voiceProfile"] as? String ?? "Calm & Clear",
+                        dailyAffirmationCount: preferencesData["dailyAffirmationCount"] as? Int ?? 5,
+                        notificationEnabled: preferencesData["notificationEnabled"] as? Bool ?? false,
+                        notificationTime: (preferencesData["notificationTime"] as? Timestamp)?.dateValue(),
+                        theme: AppTheme(rawValue: preferencesData["theme"] as? String ?? "system") ?? .system
+                    )
+                    
+                    // Create custom User model
+                    self.userProfile = User(
+                        id: userId,
+                        email: self.currentUser?.email ?? "",
+                        displayName: data["displayName"] as? String,
+                        preferences: preferences,
+                        createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
+                        lastActiveAt: (data["lastActiveAt"] as? Timestamp)?.dateValue(),
+                        totalAffirmationsViewed: data["totalAffirmationsViewed"] as? Int ?? 0,
+                        favoriteCount: data["favoriteCount"] as? Int ?? 0,
+                        currentStreak: data["currentStreak"] as? Int ?? 0,
+                        longestStreak: data["longestStreak"] as? Int ?? 0
+                    )
                 }
             }
     }
@@ -99,6 +143,11 @@ class AuthenticationManager {
             // Simulate success in preview
             isAuthenticated = true
             hasCompletedOnboarding = true
+            userProfile = User(
+                id: "preview-user",
+                email: email,
+                displayName: "Preview User"
+            )
             return
         }
         
@@ -106,7 +155,11 @@ class AuthenticationManager {
         errorMessage = nil
         
         do {
-            try await Auth.auth().signIn(withEmail: email, password: password)
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            
+            // Update last active timestamp
+            try await updateLastActive(userId: result.user.uid)
+            
             isLoading = false
         } catch {
             isLoading = false
@@ -120,6 +173,10 @@ class AuthenticationManager {
             // Simulate success in preview
             isAuthenticated = true
             hasCompletedOnboarding = false
+            userProfile = User(
+                id: "preview-user",
+                email: email
+            )
             return
         }
         
@@ -144,6 +201,7 @@ class AuthenticationManager {
         guard !isPreview else {
             isAuthenticated = false
             hasCompletedOnboarding = false
+            userProfile = nil
             return
         }
         
@@ -155,30 +213,119 @@ class AuthenticationManager {
     }
     
     // MARK: - User Profile Creation
-    private func createUserProfile(for user: User, email: String) async throws {
+    private func createUserProfile(for user: FirebaseAuth.User, email: String) async throws {
         guard !isPreview else { return }
         
         let userData: [String: Any] = [
             "email": email,
-            "createdAt": Date(),
+            "createdAt": Timestamp(date: Date()),
             "onboardingCompleted": false,
             "preferences": [
                 "categories": [],
-                "preferredTone": "gentle",
-                "dailyAffirmationCount": 5
-            ]
+                "voiceProfile": "Calm & Clear",
+                "dailyAffirmationCount": 5,
+                "notificationEnabled": false,
+                "theme": "system"
+            ],
+            "totalAffirmationsViewed": 0,
+            "favoriteCount": 0,
+            "currentStreak": 0,
+            "longestStreak": 0
         ]
         
         let db = Firestore.firestore()
         try await db.collection("users").document(user.uid).setData(userData)
     }
     
-    // MARK: - Reset Password
-    func resetPassword(email: String) async throws {
+    // MARK: - Update Methods
+    func completeOnboarding(categories: [String]) async throws {
+        guard let userId = currentUser?.uid else {
+            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        
         guard !isPreview else {
-            // Simulate success in preview
+            hasCompletedOnboarding = true
+            userProfile?.preferences.categories = categories
             return
         }
+        
+        let updates: [String: Any] = [
+            "onboardingCompleted": true,
+            "preferences.categories": categories,
+            "lastActiveAt": Timestamp(date: Date())
+        ]
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).updateData(updates)
+    }
+    
+    func updateUserPreferences(_ preferences: UserPreferences) async throws {
+        guard let userId = currentUser?.uid else {
+            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        
+        guard !isPreview else {
+            userProfile?.preferences = preferences
+            return
+        }
+        
+        let preferencesData: [String: Any] = [
+            "preferences.categories": preferences.categories,
+            "preferences.voiceProfile": preferences.voiceProfile,
+            "preferences.dailyAffirmationCount": preferences.dailyAffirmationCount,
+            "preferences.notificationEnabled": preferences.notificationEnabled,
+            "preferences.notificationTime": preferences.notificationTime != nil ? Timestamp(date: preferences.notificationTime!) : NSNull(),
+            "preferences.theme": preferences.theme.rawValue,
+            "lastActiveAt": Timestamp(date: Date())
+        ]
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).updateData(preferencesData)
+    }
+    
+    func updateDisplayName(_ displayName: String) async throws {
+        guard let userId = currentUser?.uid else {
+            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        
+        guard !isPreview else {
+            userProfile?.displayName = displayName
+            return
+        }
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).updateData([
+            "displayName": displayName,
+            "lastActiveAt": Timestamp(date: Date())
+        ])
+    }
+    
+    func incrementAffirmationCount() async throws {
+        guard let userId = currentUser?.uid else { return }
+        guard !isPreview else {
+            userProfile?.totalAffirmationsViewed += 1
+            return
+        }
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).updateData([
+            "totalAffirmationsViewed": FieldValue.increment(Int64(1)),
+            "lastActiveAt": Timestamp(date: Date())
+        ])
+    }
+    
+    private func updateLastActive(userId: String) async throws {
+        guard !isPreview else { return }
+        
+        let db = Firestore.firestore()
+        try await db.collection("users").document(userId).updateData([
+            "lastActiveAt": Timestamp(date: Date())
+        ])
+    }
+    
+    // MARK: - Reset Password
+    func resetPassword(email: String) async throws {
+        guard !isPreview else { return }
         
         try await Auth.auth().sendPasswordReset(withEmail: email)
     }
@@ -191,6 +338,18 @@ extension AuthenticationManager {
         let manager = AuthenticationManager(isPreview: true)
         manager.isAuthenticated = isAuthenticated
         manager.hasCompletedOnboarding = hasCompletedOnboarding
+        
+        if isAuthenticated {
+            manager.userProfile = User(
+                id: "preview-user",
+                email: "preview@example.com",
+                displayName: "Preview User",
+                preferences: UserPreferences(
+                    categories: hasCompletedOnboarding ? ["motivation", "confidence"] : []
+                )
+            )
+        }
+        
         return manager
     }
     
@@ -208,6 +367,12 @@ extension AuthenticationManager {
     VStack(spacing: 20) {
         Text("Authenticated: \(AuthenticationManager.preview.isAuthenticated ? "Yes" : "No")")
         Text("Onboarded: \(AuthenticationManager.preview.hasCompletedOnboarding ? "Yes" : "No")")
+        
+        if let profile = AuthenticationManager.preview.userProfile {
+            Text("User: \(profile.displayNameOrEmail)")
+            Text("Member for: \(profile.membershipDuration)")
+            Text("Categories: \(profile.preferences.categories.joined(separator: ", "))")
+        }
         
         Button("Toggle Auth") {
             AuthenticationManager.preview.isAuthenticated.toggle()

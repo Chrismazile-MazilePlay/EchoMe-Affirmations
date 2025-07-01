@@ -110,7 +110,7 @@ struct MockDataProvider {
     
     // Keep the tuple versions for backward compatibility temporarily
     var mockAffirmationTuples: [(id: String, text: String)] {
-        mockAffirmations.map { (id: $0.id ?? "", text: $0.text) }
+        mockAffirmations.map { (id: $0.id, text: $0.text) }
     }
     
     // MARK: - Mock Categories
@@ -129,12 +129,12 @@ struct MockDataProvider {
     // MARK: - Mock Favorites
     var mockFavorites: [Affirmation] {
         Array(mockAffirmations.filter {
-            ["mock1", "mock4", "mock7", "mock11"].contains($0.id ?? "")
+            ["mock1", "mock4", "mock7", "mock11"].contains($0.id)
         })
     }
     
     var mockFavoriteTuples: [(id: String, text: String)] {
-        mockFavorites.map { (id: $0.id ?? "", text: $0.text) }
+        mockFavorites.map { (id: $0.id, text: $0.text) }
     }
     
     // MARK: - Functions for different views
@@ -144,7 +144,7 @@ struct MockDataProvider {
     
     // Tuple version for backward compatibility
     func getDailyAffirmationTuples(count: Int = 5) -> [(id: String, text: String)] {
-        getDailyAffirmations(count: count).map { (id: $0.id ?? "", text: $0.text) }
+        getDailyAffirmations(count: count).map { (id: $0.id, text: $0.text) }
     }
     
     func getFavoriteAffirmations() -> [Affirmation] {

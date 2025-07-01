@@ -124,7 +124,7 @@ struct AffirmationWatchView: View {
         
         // Send favorite update to iPhone
         connectivityManager.toggleFavorite(
-            affirmationId: affirmation.id ?? "",
+            affirmationId: affirmation.id,
             affirmationText: affirmation.text )
     }
     
@@ -133,7 +133,7 @@ struct AffirmationWatchView: View {
             isFavorite = Int.random(in: 0...2) == 0
         } else {
             // Check if this affirmation is in favorites
-            isFavorite = connectivityManager.favoriteIds.contains(affirmation.id ?? "")
+            isFavorite = connectivityManager.favoriteIds.contains(affirmation.id)
         }
     }
 }

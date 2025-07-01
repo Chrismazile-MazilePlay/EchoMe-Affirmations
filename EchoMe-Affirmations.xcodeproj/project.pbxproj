@@ -37,6 +37,9 @@
 		2AA8CFA72E142F30003B2C59 /* Affirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF662E142943003B2C59 /* Affirmation.swift */; };
 		2AA8CFAA2E14383C003B2C59 /* Affirmation+Firestore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */; };
 		2AA8CFAF2E1448AB003B2C59 /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CFAE2E1448A9003B2C59 /* WatchConnectivityManager.swift */; };
+		2AD38D962E149F5E00A284A2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD38D952E149F5D00A284A2 /* Constants.swift */; };
+		2AD38D9E2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD38D9D2E14A08900A284A2 /* WatchConnectivityProtocol.swift */; };
+		2AD38D9F2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD38D9D2E14A08900A284A2 /* WatchConnectivityProtocol.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -123,6 +126,8 @@
 		2AA8CF902E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Affirmation+Firestore.swift"; sourceTree = "<group>"; };
 		2AA8CFAE2E1448A9003B2C59 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
+		2AD38D952E149F5D00A284A2 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		2AD38D9D2E14A08900A284A2 /* WatchConnectivityProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -273,6 +278,7 @@
 				2AA8CF432E1427F2003B2C59 /* EchoMe_Affirmations.entitlements */,
 				2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */,
 				2AA8CF462E1427F2003B2C59 /* GoogleService-Info.plist */,
+				2AD38D902E149F2A00A284A2 /* Shared */,
 				2AA8CF612E142911003B2C59 /* Models */,
 				2AA8CF622E142915003B2C59 /* Views */,
 				2AA8CF632E142918003B2C59 /* ViewModels */,
@@ -312,8 +318,6 @@
 			isa = PBXGroup;
 			children = (
 				2AA8CF642E142935003B2C59 /* User.swift */,
-				2AA8CF662E142943003B2C59 /* Affirmation.swift */,
-				2AA8CF682E142952003B2C59 /* VoiceProfile.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -395,6 +399,33 @@
 				2AA8CFA82E143838003B2C59 /* Affirmation+Firestore.swift */,
 			);
 			path = Firebase;
+			sourceTree = "<group>";
+		};
+		2AD38D902E149F2A00A284A2 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				2AD38D972E149FC500A284A2 /* Protocols */,
+				2AD38D9B2E14A01900A284A2 /* Models */,
+				2AD38D952E149F5D00A284A2 /* Constants.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		2AD38D972E149FC500A284A2 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				2AD38D9D2E14A08900A284A2 /* WatchConnectivityProtocol.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		2AD38D9B2E14A01900A284A2 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2AA8CF662E142943003B2C59 /* Affirmation.swift */,
+				2AA8CF682E142952003B2C59 /* VoiceProfile.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -650,6 +681,7 @@
 			files = (
 				2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */,
 				2AA8CFAA2E14383C003B2C59 /* Affirmation+Firestore.swift in Sources */,
+				2AD38D9F2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */,
 				2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */,
 				2AA8CF732E142A83003B2C59 /* AuthenticationManager.swift in Sources */,
 				2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */,
@@ -662,6 +694,7 @@
 				2A903DDB2E1473C9003FC209 /* FavoritesManager.swift in Sources */,
 				2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */,
 				2AA8CF542E1427F2003B2C59 /* SpeechManager.swift in Sources */,
+				2AD38D962E149F5E00A284A2 /* Constants.swift in Sources */,
 				2AA8CF712E142A51003B2C59 /* AffirmationCard.swift in Sources */,
 				2AA8CF652E142937003B2C59 /* User.swift in Sources */,
 				2AA8CF552E1427F2003B2C59 /* VoiceSettingsView.swift in Sources */,
@@ -687,6 +720,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2AA8CFA52E142F30003B2C59 /* MockDataProvider.swift in Sources */,
+				2AD38D9E2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */,
 				2AA8CFA62E142F30003B2C59 /* VoiceProfile.swift in Sources */,
 				2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */,
 				2A903DD32E147133003FC209 /* ContentView.swift in Sources */,

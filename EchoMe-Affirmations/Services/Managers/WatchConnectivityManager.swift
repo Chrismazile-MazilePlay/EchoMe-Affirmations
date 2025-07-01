@@ -13,27 +13,26 @@ import Observation
 
 @Observable
 @MainActor
-class WatchConnectivityManager: NSObject {
+class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProtocol {
     static let shared = WatchConnectivityManager()
     
-    // Observable properties
+    // MARK: - Observable Properties
     var isReachable = false
     var isPaired = false
     var isWatchAppInstalled = false
     
-    private let session: WCSession
+    // MARK: - WatchConnectivityProtocol
+    let session: WCSession
     
     private override init() {
         self.session = WCSession.default
         super.init()
-        
-        if WCSession.isSupported() {
-            session.delegate = self
-            session.activate()
-        }
+        startSession()
     }
     
-    // Send affirmations to watch
+    // MARK: - Send Methods
+    
+    /// Send affirmations to watch
     func sendAffirmationsToWatch(_ affirmations: [Affirmation]) {
         guard session.activationState == .activated else { return }
         
@@ -41,7 +40,10 @@ class WatchConnectivityManager: NSObject {
             [
                 "id": affirmation.id,
                 "text": affirmation.text,
-                "categories": affirmation.categories
+                "categories": affirmation.categories,
+                "tone": affirmation.tone,
+                "length": affirmation.length,
+                "isActive": affirmation.isActive
             ]
         }
         
@@ -49,10 +51,10 @@ class WatchConnectivityManager: NSObject {
         let favoriteIds = Array(FavoritesManager.shared.favoriteIds)
         
         let context: [String: Any] = [
-            "type": "affirmations",
-            "data": affirmationData,
-            "favoriteIds": favoriteIds,
-            "timestamp": Date().timeIntervalSince1970
+            WatchMessageType.type: WatchMessageType.affirmations,
+            WatchMessageKey.data: affirmationData,
+            WatchMessageType.favoriteIds: favoriteIds,
+            WatchMessageType.timestamp: Date().timeIntervalSince1970
         ]
         
         do {
@@ -63,15 +65,15 @@ class WatchConnectivityManager: NSObject {
         }
     }
     
-    // Send favorite IDs to Watch
+    /// Send favorite IDs to Watch (from protocol)
     func sendFavoriteIds(_ favoriteIds: [String]) {
         guard session.activationState == .activated else { return }
         
         // Send via immediate message if reachable
         if session.isReachable {
             session.sendMessage([
-                "type": "favoriteIds",
-                "favoriteIds": favoriteIds
+                WatchMessageType.type: WatchMessageType.favoriteIds,
+                WatchMessageType.favoriteIds: favoriteIds
             ], replyHandler: nil) { error in
                 print("❌ Failed to send favorite IDs: \(error)")
             }
@@ -80,9 +82,9 @@ class WatchConnectivityManager: NSObject {
         // Always update context for persistence
         do {
             try session.updateApplicationContext([
-                "type": "favoriteIds",
-                "favoriteIds": favoriteIds,
-                "timestamp": Date().timeIntervalSince1970
+                WatchMessageType.type: WatchMessageType.favoriteIds,
+                WatchMessageType.favoriteIds: favoriteIds,
+                WatchMessageType.timestamp: Date().timeIntervalSince1970
             ])
             print("✅ Updated favorite IDs in context")
         } catch {
@@ -90,11 +92,13 @@ class WatchConnectivityManager: NSObject {
         }
     }
     
-    // Handle favorite toggle from watch
-    private func handleFavoriteToggle(_ message: [String: Any]) {
-        guard let affirmationId = message["affirmationId"] as? String,
-              let affirmationText = message["affirmationText"] as? String,
-              let isFavorite = message["isFavorite"] as? Bool,
+    // MARK: - Handle Methods
+    
+    /// Handle favorite toggle from watch (from protocol)
+    func handleFavoriteToggle(_ message: [String: Any]) {
+        guard let affirmationId = message[WatchMessageKey.affirmationId] as? String,
+              let affirmationText = message[WatchMessageKey.affirmationText] as? String,
+              let isFavorite = message[WatchMessageKey.isFavorite] as? Bool,
               let userId = Auth.auth().currentUser?.uid else { return }
         
         let db = Firestore.firestore()
@@ -124,11 +128,12 @@ class WatchConnectivityManager: NSObject {
         }
     }
     
-    // Handle watch requests
+    /// Handle watch requests
     private func handleWatchRequest(_ message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        if let request = message["request"] as? String, request == "affirmations" {
+        if let request = message[WatchMessageKey.request] as? String,
+           request == WatchMessageType.requestAffirmations {
             print("📱 Watch requested affirmations")
-            replyHandler(["status": "acknowledged"])
+            replyHandler([WatchMessageKey.status: "acknowledged"])
         }
     }
 }
@@ -155,9 +160,10 @@ extension WatchConnectivityManager: WCSessionDelegate {
     
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
         Task { @MainActor in
-            if let type = message["type"] as? String, type == "favoriteToggle" {
+            if let type = message[WatchMessageType.type] as? String,
+               type == WatchMessageType.favoriteToggle {
                 self.handleFavoriteToggle(message)
-                replyHandler(["status": "received"])
+                replyHandler([WatchMessageKey.status: "received"])
             } else {
                 self.handleWatchRequest(message, replyHandler: replyHandler)
             }
@@ -166,7 +172,8 @@ extension WatchConnectivityManager: WCSessionDelegate {
     
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         Task { @MainActor in
-            if let type = message["type"] as? String, type == "favoriteToggle" {
+            if let type = message[WatchMessageType.type] as? String,
+               type == WatchMessageType.favoriteToggle {
                 self.handleFavoriteToggle(message)
             }
         }

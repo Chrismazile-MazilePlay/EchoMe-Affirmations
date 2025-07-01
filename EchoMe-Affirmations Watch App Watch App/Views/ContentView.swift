@@ -33,7 +33,6 @@ struct ContentView: View {
                 }
         }
         .onAppear {
-            connectivityManager.startSession()
             loadAffirmations()
         }
     }
@@ -108,7 +107,7 @@ struct ContentView: View {
         return connectivityManager.favoriteIds.contains(affirmationId)
     }
     
-    private func toggleFavorite(_ affirmation: (id: String, text: String)) {
+    private func toggleFavorite(_ affirmation: Affirmation) {
         // Toggle favorite through connectivity manager
         connectivityManager.toggleFavorite(
             affirmationId: affirmation.id,
