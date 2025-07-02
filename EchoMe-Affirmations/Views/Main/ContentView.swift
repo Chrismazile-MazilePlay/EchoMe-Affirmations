@@ -1,3 +1,10 @@
+//
+//  ContentView.swift
+//  EchoMe-Affirmations
+//
+//  Created by Christopher Mazile on 6/30/25.
+//
+
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -13,96 +20,126 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack(alignment: .top) {
-                if isLoading {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if affirmations.isEmpty {
-                    VStack(spacing: 20) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 60))
-                            .foregroundColor(.gray)
-                        Text("No affirmations found")
-                            .font(.title3)
-                            .foregroundColor(.gray)
-                        Text("Try updating your preferences")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 0) {
-                            // Category tags
-                            if !userCategories.isEmpty {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(userCategories, id: \.self) { category in
-                                            CategoryTag(category: category)
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                }
-                                .padding(.top, 12)
-                                .padding(.bottom, 16)
-                            }
-                            
-                            // Affirmations
-                            VStack(spacing: 15) {
-                                ForEach(affirmations) { affirmation in
-                                    AffirmationCard(
-                                        id: affirmation.id,
-                                        text: affirmation.text
-                                    )
-                                }
-                            }
-                            .padding(.horizontal)
-                            .padding(.bottom, 20)
-                        }
-                        .frame(maxWidth: .infinity)
+            mainContent
+                .navigationTitle("Your Daily Affirmations")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        navigationMenu
                     }
                 }
-            }
-            .navigationTitle("Your Daily Affirmations")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        NavigationLink {
-                            FavoritesView()
-                        } label: {
-                            Label("My Favorites", systemImage: "heart.fill")
-                        }
-                        
-                        NavigationLink {
-                            VoiceSettingsView()
-                        } label: {
-                            Label("Voice Settings", systemImage: "speaker.wave.3")
-                        }
-                        
-                        Divider()
-                        
-                        Button(action: { authManager.signOut() }) {
-                            Label("Sign Out", systemImage: "arrow.right.square")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                    }
-                }
+                .onAppear { handleOnAppear() }
+                .onDisappear { handleOnDisappear() }
+        }
+    }
+    
+    // MARK: - View Components
+    
+    private var mainContent: some View {
+        ZStack(alignment: .top) {
+            if isLoading {
+                loadingView
+            } else if affirmations.isEmpty {
+                emptyStateView
+            } else {
+                affirmationsList
             }
         }
-        .onAppear {
-            loadContent()
-            // Start listening to favorites changes
-            if !MockDataProvider.isPreview {
-                favoritesManager.startListening()
+    }
+    
+    private var loadingView: some View {
+        ProgressView()
+            .scaleEffect(1.5)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var emptyStateView: some View {
+        ContentEmptyState()
+    }
+    
+    private var affirmationsList: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                categoryTagsSection
+                affirmationsSection
+            }
+            .frame(maxWidth: .infinity)
+        }
+    }
+    
+    private var categoryTagsSection: some View {
+        Group {
+            if !userCategories.isEmpty {
+                CategoryTagsRow(categories: userCategories)
+                    .padding(.top, 12)
+                    .padding(.bottom, 16)
             }
         }
-        .onDisappear {
-            // Stop listening when view disappears
-            if !MockDataProvider.isPreview {
-                favoritesManager.stopListening()
+    }
+    
+    private var affirmationsSection: some View {
+        VStack(spacing: 15) {
+            ForEach(affirmations) { affirmation in
+                AffirmationCard(
+                    id: affirmation.id,
+                    text: affirmation.text
+                )
+                .onAppear { trackAffirmationView(affirmation) }
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 20)
+    }
+    
+    private var navigationMenu: some View {
+        Menu {
+            menuContent
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+    }
+    
+    private var menuContent: some View {
+        Group {
+            NavigationLink {
+                FavoritesView()
+            } label: {
+                Label("My Favorites", systemImage: "heart.fill")
+            }
+            
+            NavigationLink {
+                VoiceSettingsView()
+            } label: {
+                Label("Voice Settings", systemImage: "speaker.wave.3")
+            }
+            
+            Divider()
+            
+            Button(action: { authManager.signOut() }) {
+                Label("Sign Out", systemImage: "arrow.right.square")
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    private func handleOnAppear() {
+        loadContent()
+        if !MockDataProvider.isPreview {
+            favoritesManager.startListening()
+        }
+    }
+    
+    private func handleOnDisappear() {
+        if !MockDataProvider.isPreview {
+            favoritesManager.stopListening()
+        }
+    }
+    
+    private func trackAffirmationView(_ affirmation: Affirmation) {
+        if affirmation == affirmations.last {
+            Task {
+                await authManager.trackAffirmationViewed()
             }
         }
     }
@@ -117,60 +154,46 @@ struct ContentView: View {
         }
     }
     
-    func loadMockData() {
+    private func loadMockData() {
         MockDataProvider.simulateLoading(seconds: 0.3) {
             self.affirmations = MockDataProvider.shared.getDailyAffirmations()
             self.userCategories = MockDataProvider.shared.getUserCategories()
             self.isLoading = false
-            
-            // Send to watch
             sendAffirmationsToWatch()
         }
     }
     
-    func fetchPersonalizedAffirmations() async {
-        // Guard against preview environment
+    private func fetchPersonalizedAffirmations() async {
         guard !MockDataProvider.isPreview else {
             loadMockData()
             return
         }
         
-        guard let userId = Auth.auth().currentUser?.uid else {
+        guard let userProfile = authManager.userProfile else {
             self.isLoading = false
             return
         }
         
+        self.userCategories = userProfile.preferences.categories
+        
         do {
-            let db = Firestore.firestore()
+            let affirmationLimit = userProfile.preferences.dailyAffirmationCount
             
-            // Get user preferences
-            let userDoc = try await db.collection("users").document(userId).getDocument()
-            
-            if let data = userDoc.data(),
-               let preferences = data["preferences"] as? [String: Any],
-               let categories = preferences["categories"] as? [String] {
-                
-                self.userCategories = categories
-                
-                // Fetch affirmations
-                if !categories.isEmpty {
-                    self.affirmations = try await Affirmation.fetchByCategories(categories, limit: 10)
-                        .shuffled()
-                        .prefix(5)
-                        .map { $0 }
-                } else {
-                    self.affirmations = try await Affirmation.fetchRandom(limit: 5)
-                }
+            if !userCategories.isEmpty {
+                self.affirmations = try await Affirmation
+                    .fetchByCategories(userCategories, limit: 10)
+                    .shuffled()
+                    .prefix(affirmationLimit)
+                    .map { $0 }
             } else {
-                self.affirmations = try await Affirmation.fetchRandom(limit: 5)
+                self.affirmations = try await Affirmation
+                    .fetchRandom(limit: affirmationLimit)
             }
         } catch {
             print("Error fetching affirmations: \(error)")
         }
         
         self.isLoading = false
-        
-        // Send affirmations to watch after loading
         sendAffirmationsToWatch()
     }
     
@@ -180,7 +203,42 @@ struct ContentView: View {
     }
 }
 
-// Category Tag Component
+// MARK: - Supporting Views
+
+struct ContentEmptyState: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 60))
+                .foregroundColor(.gray)
+            
+            Text("No affirmations found")
+                .font(.title3)
+                .foregroundColor(.gray)
+            
+            Text("Try updating your preferences")
+                .font(.caption)
+                .foregroundColor(.gray)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct CategoryTagsRow: View {
+    let categories: [String]
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack {
+                ForEach(categories, id: \.self) { category in
+                    CategoryTag(category: category)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+}
+
 struct CategoryTag: View {
     let category: String
     

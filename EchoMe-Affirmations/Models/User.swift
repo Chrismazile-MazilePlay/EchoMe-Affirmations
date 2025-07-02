@@ -49,7 +49,7 @@ struct User: Codable, Equatable {
 // MARK: - User Preferences
 struct UserPreferences: Codable, Equatable {
     var categories: [String]
-    let voiceProfile: String
+    var voiceProfile: String
     let dailyAffirmationCount: Int
     let notificationEnabled: Bool
     let notificationTime: Date?

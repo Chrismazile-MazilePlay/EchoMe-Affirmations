@@ -314,6 +314,10 @@ class AuthenticationManager {
         ])
     }
     
+    func trackAffirmationViewed() async {
+        try? await incrementAffirmationCount()
+    }
+    
     private func updateLastActive(userId: String) async throws {
         guard !isPreview else { return }
         

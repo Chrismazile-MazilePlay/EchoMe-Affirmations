@@ -10,111 +10,163 @@ import FirebaseFirestore
 import FirebaseAuth
 
 struct AffirmationCard: View {
+    @Environment(AuthenticationManager.self) private var authManager
+    @State private var favoritesManager = FavoritesManager.shared
+    @State private var speechManager = SpeechManager()
+    
     let id: String
     let text: String
-    @State private var speechManager = SpeechManager()
-    @State private var isPlaying = false
-    @State private var userVoiceProfile = VoiceProfile.defaultVoiceProfile
-    @State private var isAnimatingHeart = false
-    @State private var favoritesManager = FavoritesManager.shared
     
-    var isFavorite: Bool {
-        favoritesManager.isFavorite(id)
-    }
+    @State private var isAnimatingHeart = false
+    @State private var userVoiceProfile: VoiceProfile?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(text)
-                .font(.body)
-                .fixedSize(horizontal: false, vertical: true)
-            
-            HStack {
-                Button(action: toggleSpeech) {
-                    HStack(spacing: 6) {
-                        Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.title2)
-                        
-                        if isPlaying {
-                            HStack(spacing: 3) {
-                                ForEach(0..<3) { i in
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .fill(Color.blue)
-                                        .frame(width: 3, height: isPlaying ? 15 : 8)
-                                        .animation(
-                                            Animation.easeInOut(duration: 0.5)
-                                                .repeatForever(autoreverses: true)
-                                                .delay(Double(i) * 0.1),
-                                            value: isPlaying
-                                        )
-                                }
-                            }
-                            .transition(.scale.combined(with: .opacity))
-                        }
-                    }
-                }
-                .foregroundColor(.blue)
-                
-                Spacer()
-                
-                Button(action: toggleFavorite) {
-                    Image(systemName: isFavorite ? "heart.fill" : "heart")
-                        .foregroundColor(isFavorite ? .red : .gray)
-                        .scaleEffect(isAnimatingHeart ? 1.3 : 1.0)
-                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimatingHeart)
-                }
-            }
+            affirmationText
+            actionButtons
         }
         .padding()
-        .frame(maxWidth: .infinity)
-        .background(Color.blue.opacity(0.05))
-        .cornerRadius(15)
-        .onChange(of: speechManager.isSpeaking) { oldValue, newValue in
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isPlaying = newValue && speechManager.currentUtteranceId == id
-            }
-        }
-        .onAppear {
-            loadUserVoicePreference()
+        .background(cardBackground)
+        .onAppear { loadUserVoiceProfile() }
+    }
+    
+    // MARK: - View Components
+    
+    private var affirmationText: some View {
+        Text(text)
+            .font(.body)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+    
+    private var actionButtons: some View {
+        HStack {
+            playButton
+            Spacer()
+            shareButton
+            favoriteButton
         }
     }
     
-    func toggleSpeech() {
-        if isPlaying {
+    private var playButton: some View {
+        Button(action: toggleSpeech) {
+            HStack(spacing: 6) {
+                Image(systemName: playButtonIcon)
+                Text(playButtonText)
+                    .font(.caption)
+            }
+            .foregroundColor(.blue)
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var shareButton: some View {
+        Button(action: share) {
+            Image(systemName: "square.and.arrow.up")
+                .font(.system(size: 20))
+                .foregroundColor(.gray)
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var favoriteButton: some View {
+        Button(action: toggleFavorite) {
+            Image(systemName: favoriteIcon)
+                .font(.system(size: 22))
+                .foregroundColor(favoriteColor)
+                .scaleEffect(heartScale)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isAnimatingHeart)
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private var cardBackground: some View {
+        Color(.systemBackground)
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var isCurrentlyPlaying: Bool {
+        speechManager.isSpeaking && speechManager.currentUtteranceId == id
+    }
+    
+    private var playButtonIcon: String {
+        isCurrentlyPlaying ? "stop.circle.fill" : "play.circle.fill"
+    }
+    
+    private var playButtonText: String {
+        isCurrentlyPlaying ? "Stop" : "Play"
+    }
+    
+    private var isFavorite: Bool {
+        favoritesManager.isFavorite(id)
+    }
+    
+    private var favoriteIcon: String {
+        isFavorite ? "heart.fill" : "heart"
+    }
+    
+    private var favoriteColor: Color {
+        isFavorite ? .red : .gray
+    }
+    
+    private var heartScale: CGFloat {
+        isAnimatingHeart ? 1.2 : 1.0
+    }
+    
+    // MARK: - Actions
+    
+    private func toggleSpeech() {
+        if isCurrentlyPlaying {
             speechManager.stop()
         } else {
-            speechManager.speak(text, id: id, voice: userVoiceProfile)
+            speak()
         }
     }
     
-    func loadUserVoicePreference() {
-        guard !MockDataProvider.isPreview,
-              let userId = Auth.auth().currentUser?.uid else { return }
-        
-        let db = Firestore.firestore()
-        db.collection("users").document(userId).getDocument { snapshot, error in
-            if let data = snapshot?.data(),
-               let preferences = data["preferences"] as? [String: Any],
-               let voiceName = preferences["voiceProfile"] as? String {
-                
-                if let voice = VoiceProfile.allProfiles.first(where: { $0.name == voiceName }) {
-                    self.userVoiceProfile = voice
-                }
-            }
-        }
+    private func speak() {
+        let voiceProfile = userVoiceProfile ?? VoiceProfile.defaultVoiceProfile
+        speechManager.speak(text, voice: voiceProfile)
     }
     
-    func toggleFavorite() {
-        // Animate the heart
+    private func share() {
+        ShareHelper.share(text: text)
+    }
+    
+    private func loadUserVoiceProfile() {
+        let voiceProfileName = authManager.userProfile?.preferences.voiceProfile ?? "Calm & Clear"
+        userVoiceProfile = VoiceProfile.allProfiles.first { $0.name == voiceProfileName }
+    }
+    
+    private func toggleFavorite() {
+        animateHeart()
+        favoritesManager.toggleFavorite(affirmationId: id, affirmationText: text)
+    }
+    
+    private func animateHeart() {
         isAnimatingHeart = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isAnimatingHeart = false
         }
-        
-        // Toggle favorite using the manager
-        favoritesManager.toggleFavorite(
-            affirmationId: id,
-            affirmationText: text
+    }
+}
+
+// MARK: - Helper
+
+struct ShareHelper {
+    static func share(text: String) {
+        let activityVC = UIActivityViewController(
+            activityItems: [text],
+            applicationActivities: nil
         )
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootVC = window.rootViewController else { return }
+        
+        rootVC.present(activityVC, animated: true)
     }
 }
 
@@ -124,4 +176,5 @@ struct AffirmationCard: View {
         text: "I am capable of achieving great things in my life"
     )
     .padding()
+    .environment(AuthenticationManager.previewAuthenticated)
 }

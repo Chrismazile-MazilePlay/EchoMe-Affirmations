@@ -33,7 +33,7 @@ class SpeechManager: NSObject, AVSpeechSynthesizerDelegate {
         }
     }
     
-    func speak(_ text: String, id: String, voice: VoiceProfile = .defaultVoiceProfile) {
+    func speak(_ text: String, voice: VoiceProfile = .defaultVoiceProfile) {
         // Stop current speech if any
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
@@ -52,7 +52,7 @@ class SpeechManager: NSObject, AVSpeechSynthesizerDelegate {
             utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         }
         
-        currentUtteranceId = id
+        currentUtteranceId = voice.identifier
         synthesizer.speak(utterance)
     }
     
