@@ -11,14 +11,13 @@ import FirebaseAuth
 import WatchConnectivity
 
 struct ContentView: View {
-    @Environment(AuthenticationManager.self) private var authManager
     @Environment(\.services) private var services
-    
     @State private var affirmations: [Affirmation] = []
     @State private var isLoading = true
     @State private var userCategories: [String] = []
     
     // Easy access to managers
+    private var authManager: AuthenticationManager { services.authManager }
     private var favoritesManager: FavoritesManager { services.favoritesManager }
     private var watchConnectivityManager: WatchConnectivityManager { services.watchConnectivityManager }
     

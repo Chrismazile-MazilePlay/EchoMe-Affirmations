@@ -13,24 +13,36 @@ import SwiftUI
 
 @Observable
 @MainActor
-class AuthenticationService {
+public class AuthenticationManager {
     // MARK: - Properties
-    var isAuthenticated = false
-    var hasCompletedOnboarding = false
     var currentUser: FirebaseAuth.User?  // Firebase auth user
     var userProfile: User?  // Our custom user model
     var isLoading = false
     var errorMessage: String?
     
+    // Navigation state reference
+    weak var navigationState: NavigationState?
+    
     // MARK: - Private Properties
     private var authStateListener: AuthStateDidChangeListenerHandle?
     private var userProfileListener: ListenerRegistration?
+    private let isPreview: Bool
+    
+    // MARK: - Initialization (Changed to public)
+    public init(isPreview: Bool = false) {
+        self.isPreview = isPreview
+        
+        // Only setup Firebase listeners if not in preview
+        if !isPreview && !MockDataProvider.isPreview {
+            Task {
+                await setupAuthStateListener()
+            }
+        }
+    }
     
     // MARK: - Preview Support
-    static let preview: AuthenticationService = {
-        let manager = AuthenticationService(isPreview: true)
-        manager.isAuthenticated = true
-        manager.hasCompletedOnboarding = true
+    static let preview: AuthenticationManager = {
+        let manager = AuthenticationManager(isPreview: true)
         manager.userProfile = User(
             id: "preview-user",
             email: "preview@example.com",
@@ -39,18 +51,6 @@ class AuthenticationService {
         )
         return manager
     }()
-    
-    private let isPreview: Bool
-    
-    // MARK: - Initialization
-    public init(isPreview: Bool = false) {
-        self.isPreview = isPreview
-        
-        // Only setup Firebase listeners if not in preview
-        if !isPreview && !MockDataProvider.isPreview {
-            setupAuthStateListener()
-        }
-    }
     
     // MARK: - Cleanup
     func cleanup() {
@@ -63,18 +63,22 @@ class AuthenticationService {
     }
     
     // MARK: - Auth State Management
-    private func setupAuthStateListener() {
+    private func setupAuthStateListener() async {
         authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor in
-                self?.isAuthenticated = user != nil
-                self?.currentUser = user
+                guard let self = self else { return }
+                
+                self.currentUser = user
                 
                 if let user = user {
-                    await self?.listenToUserProfile(userId: user.uid)
+                    // User is authenticated - update navigation state instantly
+                    self.navigationState?.setAuthenticated(userId: user.uid)
+                    await self.listenToUserProfile(userId: user.uid)
                 } else {
-                    self?.userProfileListener?.remove()
-                    self?.hasCompletedOnboarding = false
-                    self?.userProfile = nil
+                    // User signed out - clear everything instantly
+                    self.navigationState?.signOut()
+                    self.userProfileListener?.remove()
+                    self.userProfile = nil
                 }
             }
         }
@@ -82,7 +86,11 @@ class AuthenticationService {
     
     // MARK: - User Profile Management
     private func listenToUserProfile(userId: String) async {
-        guard !isPreview else { return }
+        guard !isPreview else {
+            // In preview, simulate onboarding completed
+            navigationState?.setOnboardingCompleted()
+            return
+        }
         
         userProfileListener?.remove()
         
@@ -98,13 +106,16 @@ class AuthenticationService {
                     }
                     
                     guard let data = snapshot?.data() else {
-                        self.hasCompletedOnboarding = false
                         self.userProfile = nil
                         return
                     }
                     
-                    // Update onboarding status
-                    self.hasCompletedOnboarding = data["onboardingCompleted"] as? Bool ?? false
+                    // Update onboarding status instantly in navigation state
+                    if let onboardingCompleted = data["onboardingCompleted"] as? Bool {
+                        if onboardingCompleted {
+                            self.navigationState?.setOnboardingCompleted()
+                        }
+                    }
                     
                     // Parse preferences
                     let preferencesData = data["preferences"] as? [String: Any] ?? [:]
@@ -138,8 +149,8 @@ class AuthenticationService {
     func signIn(email: String, password: String) async throws {
         guard !isPreview else {
             // Simulate success in preview
-            isAuthenticated = true
-            hasCompletedOnboarding = true
+            navigationState?.setAuthenticated(userId: "preview-user")
+            navigationState?.setOnboardingCompleted()
             userProfile = User(
                 id: "preview-user",
                 email: email,
@@ -154,6 +165,7 @@ class AuthenticationService {
         do {
             let result = try await Auth.auth().signIn(withEmail: email, password: password)
             
+            // Navigation state will be updated by auth state listener
             // Update last active timestamp
             try await updateLastActive(userId: result.user.uid)
             
@@ -168,8 +180,7 @@ class AuthenticationService {
     func signUp(email: String, password: String) async throws {
         guard !isPreview else {
             // Simulate success in preview
-            isAuthenticated = true
-            hasCompletedOnboarding = false
+            navigationState?.setAuthenticated(userId: "preview-user")
             userProfile = User(
                 id: "preview-user",
                 email: email
@@ -186,6 +197,7 @@ class AuthenticationService {
             // Create user profile
             try await createUserProfile(for: result.user, email: email)
             
+            // Navigation state will be updated by auth state listener
             isLoading = false
         } catch {
             isLoading = false
@@ -196,14 +208,14 @@ class AuthenticationService {
     
     func signOut() {
         guard !isPreview else {
-            isAuthenticated = false
-            hasCompletedOnboarding = false
+            navigationState?.signOut()
             userProfile = nil
             return
         }
         
         do {
             try Auth.auth().signOut()
+            // Navigation state will be updated by auth state listener
         } catch {
             print("Error signing out: \(error)")
         }
@@ -241,7 +253,7 @@ class AuthenticationService {
         }
         
         guard !isPreview else {
-            hasCompletedOnboarding = true
+            navigationState?.setOnboardingCompleted()
             userProfile?.preferences.categories = categories
             return
         }
@@ -254,8 +266,12 @@ class AuthenticationService {
         
         let db = Firestore.firestore()
         try await db.collection("users").document(userId).updateData(updates)
+        
+        // Update navigation state instantly
+        navigationState?.setOnboardingCompleted()
     }
     
+    // Rest of the methods remain the same...
     func updateUserPreferences(_ preferences: UserPreferences) async throws {
         guard let userId = currentUser?.uid else {
             throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
@@ -333,14 +349,19 @@ class AuthenticationService {
 }
 
 // MARK: - Preview Helpers
-extension AuthenticationService {
+extension AuthenticationManager {
     /// Creates a preview instance for specific authentication states
-    static func preview(isAuthenticated: Bool, hasCompletedOnboarding: Bool) -> AuthenticationService {
-        let manager = AuthenticationService(isPreview: true)
-        manager.isAuthenticated = isAuthenticated
-        manager.hasCompletedOnboarding = hasCompletedOnboarding
+    static func preview(isAuthenticated: Bool, hasCompletedOnboarding: Bool) -> AuthenticationManager {
+        let manager = AuthenticationManager(isPreview: true)
+        let navState = NavigationState()
+        manager.navigationState = navState
         
         if isAuthenticated {
+            navState.setAuthenticated(userId: "preview-user")
+            if hasCompletedOnboarding {
+                navState.setOnboardingCompleted()
+            }
+            
             manager.userProfile = User(
                 id: "preview-user",
                 email: "preview@example.com",
@@ -362,22 +383,4 @@ extension AuthenticationService {
     
     /// Preview instance for fully authenticated and onboarded
     static let previewAuthenticated = preview(isAuthenticated: true, hasCompletedOnboarding: true)
-}
-
-#Preview("Auth States", traits: .sizeThatFitsLayout) {
-    VStack(spacing: 20) {
-        Text("Authenticated: \(AuthenticationService.preview.isAuthenticated ? "Yes" : "No")")
-        Text("Onboarded: \(AuthenticationService.preview.hasCompletedOnboarding ? "Yes" : "No")")
-        
-        if let profile = AuthenticationService.preview.userProfile {
-            Text("User: \(profile.displayNameOrEmail)")
-            Text("Member for: \(profile.membershipDuration)")
-            Text("Categories: \(profile.preferences.categories.joined(separator: ", "))")
-        }
-        
-        Button("Toggle Auth") {
-            AuthenticationService.preview.isAuthenticated.toggle()
-        }
-    }
-    .environment(AuthenticationService.preview)
 }

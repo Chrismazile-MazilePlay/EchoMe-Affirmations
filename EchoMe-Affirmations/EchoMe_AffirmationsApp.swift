@@ -5,26 +5,17 @@
 //  Created by Christopher Mazile on 6/30/25.
 //
 
-//
-//  EchoMe_AffirmationsApp.swift
-//  EchoMe-Affirmations
-//
-//  Created by Christopher Mazile on 6/30/25.
-//
-
 import SwiftUI
 import FirebaseCore
 
 @main
 struct EchoMe_AffirmationsApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
-    // Create managers once at app level
     @State private var services = ServicesContainer()
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environment(\.services, services)
         }
     }

@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		2A0BD8ED2E14BB9B0029B6DB /* ServicesContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8EC2E14BB9B0029B6DB /* ServicesContainer.swift */; };
+		2A0BD8EF2E14DA2A0029B6DB /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8EE2E14DA290029B6DB /* RootView.swift */; };
+		2A0BD8F12E14DCC20029B6DB /* NavigationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8F02E14DCC00029B6DB /* NavigationState.swift */; };
+		2A0BD8F32E14DFA80029B6DB /* DebugNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8F22E14DFA60029B6DB /* DebugNavigationView.swift */; };
 		2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */; };
 		2A903DD32E147133003FC209 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCE2E147133003FC209 /* ContentView.swift */; };
 		2A903DD42E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */; };
@@ -30,7 +33,7 @@
 		2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF662E142943003B2C59 /* Affirmation.swift */; };
 		2AA8CF692E142953003B2C59 /* VoiceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF682E142952003B2C59 /* VoiceProfile.swift */; };
 		2AA8CF712E142A51003B2C59 /* AffirmationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */; };
-		2AA8CF732E142A83003B2C59 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */; };
+		2AA8CF732E142A83003B2C59 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF722E142A7F003B2C59 /* AuthManager.swift */; };
 		2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF742E142A96003B2C59 /* FirebaseService.swift */; };
 		2AA8CF9A2E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2AA8CFA52E142F30003B2C59 /* MockDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */; };
@@ -100,6 +103,9 @@
 
 /* Begin PBXFileReference section */
 		2A0BD8EC2E14BB9B0029B6DB /* ServicesContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesContainer.swift; sourceTree = "<group>"; };
+		2A0BD8EE2E14DA290029B6DB /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		2A0BD8F02E14DCC00029B6DB /* NavigationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationState.swift; sourceTree = "<group>"; };
+		2A0BD8F22E14DFA60029B6DB /* DebugNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugNavigationView.swift; sourceTree = "<group>"; };
 		2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationWatchView.swift; sourceTree = "<group>"; };
 		2A903DCD2E147133003FC209 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A903DCE2E147133003FC209 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -124,7 +130,7 @@
 		2AA8CF662E142943003B2C59 /* Affirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Affirmation.swift; sourceTree = "<group>"; };
 		2AA8CF682E142952003B2C59 /* VoiceProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceProfile.swift; sourceTree = "<group>"; };
 		2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCard.swift; sourceTree = "<group>"; };
-		2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		2AA8CF722E142A7F003B2C59 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		2AA8CF742E142A96003B2C59 /* FirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseService.swift; sourceTree = "<group>"; };
 		2AA8CF7A2E142DCF003B2C59 /* EchoMe-Affirmations Watch App Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AA8CF862E142DD0003B2C59 /* EchoMe-Affirmations Watch App Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-Affirmations Watch App Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -347,7 +353,7 @@
 		2AA8CF632E142918003B2C59 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				2AA8CF722E142A7F003B2C59 /* AuthenticationManager.swift */,
+				2AA8CF722E142A7F003B2C59 /* AuthManager.swift */,
 				2A903DDA2E1473C5003FC209 /* FavoritesManager.swift */,
 			);
 			path = ViewModels;
@@ -373,6 +379,9 @@
 		2AA8CF6C2E14299B003B2C59 /* Main */ = {
 			isa = PBXGroup;
 			children = (
+				2A0BD8F02E14DCC00029B6DB /* NavigationState.swift */,
+				2A0BD8F22E14DFA60029B6DB /* DebugNavigationView.swift */,
+				2A0BD8EE2E14DA290029B6DB /* RootView.swift */,
 				2AA8CF422E1427F2003B2C59 /* ContentView.swift */,
 			);
 			path = Main;
@@ -706,11 +715,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */,
+				2A0BD8F12E14DCC20029B6DB /* NavigationState.swift in Sources */,
+				2A0BD8EF2E14DA2A0029B6DB /* RootView.swift in Sources */,
 				2AD38DA82E14B21F00A284A2 /* EnvironmentKeys.swift in Sources */,
+				2A0BD8F32E14DFA80029B6DB /* DebugNavigationView.swift in Sources */,
 				2AA8CFAA2E14383C003B2C59 /* Affirmation+Firestore.swift in Sources */,
 				2AD38D9F2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */,
 				2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */,
-				2AA8CF732E142A83003B2C59 /* AuthenticationManager.swift in Sources */,
+				2AA8CF732E142A83003B2C59 /* AuthManager.swift in Sources */,
 				2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */,
 				2AA8CF4F2E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift in Sources */,
 				2AA8CF502E1427F2003B2C59 /* FavoritesView.swift in Sources */,
