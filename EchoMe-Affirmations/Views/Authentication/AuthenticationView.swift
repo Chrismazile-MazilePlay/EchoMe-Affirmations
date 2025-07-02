@@ -90,6 +90,7 @@ struct AuthenticationView: View {
 }
 
 struct ResetPasswordView: View {
+    @Environment(AuthenticationManager.self) private var authManager
     @Environment(\.dismiss) private var dismiss
     @State private var email = ""
     @State private var message = ""
@@ -149,7 +150,7 @@ struct ResetPasswordView: View {
         isLoading = true
         Task {
             do {
-                try await AuthenticationManager.shared.resetPassword(email: email)
+                try await authManager.resetPassword(email: email)
                 message = "Reset link sent to \(email)"
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     dismiss()

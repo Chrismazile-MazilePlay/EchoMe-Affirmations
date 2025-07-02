@@ -12,8 +12,11 @@ import FirebaseAuth
 struct FavoritesView: View {
     @State private var favorites: [Affirmation] = []
     @State private var isLoading = true
-    @State private var favoritesManager = FavoritesManager.shared
-    
+    @Environment(\.services) private var services
+
+    // Easy access to managers
+    private var favoritesManager: FavoritesManager { services.favoritesManager }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .top) {

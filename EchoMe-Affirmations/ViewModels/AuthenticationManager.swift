@@ -26,9 +26,6 @@ class AuthenticationManager {
     private var authStateListener: AuthStateDidChangeListenerHandle?
     private var userProfileListener: ListenerRegistration?
     
-    // MARK: - Singleton
-    static let shared = AuthenticationManager()
-    
     // MARK: - Preview Support
     static let preview: AuthenticationManager = {
         let manager = AuthenticationManager(isPreview: true)

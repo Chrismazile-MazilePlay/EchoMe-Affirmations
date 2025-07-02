@@ -12,17 +12,18 @@ import Observation
 
 @Observable
 @MainActor
-class FavoritesManager {
-    static let shared = FavoritesManager()
-    
+public class FavoritesManager {
     // Observable properties
     var favoriteIds: Set<String> = []
     var isListening = false
     
-    private var favoritesListener: ListenerRegistration?
-    private let watchConnectivity = WatchConnectivityManager.shared
+    // Dependencies
+    weak var watchConnectivityManager: WatchConnectivityManager?
     
-    private init() {}
+    private var favoritesListener: ListenerRegistration?
+    
+    // Public initializer
+    public init() {}
     
     // Start listening to favorites changes
     func startListening() {
@@ -53,7 +54,7 @@ class FavoritesManager {
                     print("💖 Updated favorites: \(ids.count) items")
                     
                     // Send updated favorites to Watch
-                    self.watchConnectivity.sendFavoriteIds(Array(ids))
+                    self.watchConnectivityManager?.sendFavoriteIds(Array(ids))
                 }
             }
     }

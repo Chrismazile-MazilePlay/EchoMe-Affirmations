@@ -12,11 +12,15 @@ import WatchConnectivity
 
 struct ContentView: View {
     @Environment(AuthenticationManager.self) private var authManager
+    @Environment(\.services) private var services
+    
     @State private var affirmations: [Affirmation] = []
     @State private var isLoading = true
     @State private var userCategories: [String] = []
-    @State private var watchConnectivity = WatchConnectivityManager.shared
-    @State private var favoritesManager = FavoritesManager.shared
+    
+    // Easy access to managers
+    private var favoritesManager: FavoritesManager { services.favoritesManager }
+    private var watchConnectivityManager: WatchConnectivityManager { services.watchConnectivityManager }
     
     var body: some View {
         NavigationStack {
@@ -84,7 +88,6 @@ struct ContentView: View {
                     id: affirmation.id,
                     text: affirmation.text
                 )
-                .onAppear { trackAffirmationView(affirmation) }
             }
         }
         .padding(.horizontal)
@@ -113,6 +116,12 @@ struct ContentView: View {
                 Label("Voice Settings", systemImage: "speaker.wave.3")
             }
             
+            NavigationLink {
+                ProfileView()
+            } label: {
+                Label("Profile", systemImage: "person.circle")
+            }
+            
             Divider()
             
             Button(action: { authManager.signOut() }) {
@@ -133,14 +142,6 @@ struct ContentView: View {
     private func handleOnDisappear() {
         if !MockDataProvider.isPreview {
             favoritesManager.stopListening()
-        }
-    }
-    
-    private func trackAffirmationView(_ affirmation: Affirmation) {
-        if affirmation == affirmations.last {
-            Task {
-                await authManager.trackAffirmationViewed()
-            }
         }
     }
     
@@ -199,7 +200,7 @@ struct ContentView: View {
     
     private func sendAffirmationsToWatch() {
         print("📱 Sending \(affirmations.count) affirmations to watch")
-        watchConnectivity.sendAffirmationsToWatch(affirmations)
+        watchConnectivityManager.sendAffirmationsToWatch(affirmations)
     }
 }
 
@@ -257,4 +258,9 @@ struct CategoryTag: View {
         ContentView()
     }
     .environment(AuthenticationManager.previewAuthenticated)
+//
+//
+//    .environment(\.favoritesManager, FavoritesManager())
+//    .environment(\.watchConnectivityManager, WatchConnectivityManager())
+//    .environment(\.speechManager, SpeechManager())
 }

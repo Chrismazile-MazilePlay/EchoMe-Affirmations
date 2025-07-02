@@ -13,9 +13,7 @@ import Observation
 
 @Observable
 @MainActor
-class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProtocol {
-    static let shared = WatchConnectivityManager()
-    
+class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProtocol {    
     // MARK: - Observable Properties
     var isReachable = false
     var isPaired = false
@@ -24,7 +22,7 @@ class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProto
     // MARK: - WatchConnectivityProtocol
     let session: WCSession
     
-    private override init() {
+    public override init() {
         self.session = WCSession.default
         super.init()
         startSession()
@@ -48,7 +46,7 @@ class WatchConnectivityManager: NSObject, @preconcurrency WatchConnectivityProto
         }
         
         // Get current favorite IDs
-        let favoriteIds = Array(FavoritesManager.shared.favoriteIds)
+        let favoriteIds = Array(FavoritesManager().favoriteIds)
         
         let context: [String: Any] = [
             WatchMessageType.type: WatchMessageType.affirmations,

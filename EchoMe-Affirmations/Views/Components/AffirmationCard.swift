@@ -11,14 +11,17 @@ import FirebaseAuth
 
 struct AffirmationCard: View {
     @Environment(AuthenticationManager.self) private var authManager
-    @State private var favoritesManager = FavoritesManager.shared
-    @State private var speechManager = SpeechManager()
+    @Environment(\.services) private var services
     
     let id: String
     let text: String
     
     @State private var isAnimatingHeart = false
     @State private var userVoiceProfile: VoiceProfile?
+    
+    // Easy access to managers
+    private var favoritesManager: FavoritesManager { services.favoritesManager }
+    private var speechManager: SpeechManager { services.speechManager }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {

@@ -18,7 +18,7 @@ class SpeechManager: NSObject, AVSpeechSynthesizerDelegate {
     var isSpeaking = false
     var currentUtteranceId: String?
     
-    override init() {
+    public override init() {
         super.init()
         synthesizer.delegate = self
         setupAudioSession()
