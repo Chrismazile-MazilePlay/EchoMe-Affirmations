@@ -62,7 +62,7 @@ public class FavoritesManager {
     }
     
     // Toggle favorite
-    func toggleFavorite(affirmationId: String, affirmationText: String, completion: ((Bool) -> Void)? = nil) {
+    func toggleFavorite(affirmationId: String, affirmationText: String) {
         guard let userId = firebaseService.currentAuthUser?.uid else { return }
         
         let isFavorite = isFavorite(affirmationId)
@@ -74,7 +74,6 @@ public class FavoritesManager {
                         userId: userId,
                         affirmationId: affirmationId
                     )
-                    completion?(false)
                     print("💔 Removed from favorites")
                 } else {
                     try await firebaseService.addFavorite(
@@ -82,7 +81,6 @@ public class FavoritesManager {
                         affirmationId: affirmationId,
                         text: affirmationText
                     )
-                    completion?(true)
                     print("💖 Added to favorites")
                 }
             } catch {
