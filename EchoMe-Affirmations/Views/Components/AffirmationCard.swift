@@ -5,13 +5,6 @@
 //  Created by Christopher Mazile on 7/1/25.
 //
 
-//
-//  AffirmationCard.swift
-//  EchoMe-Affirmations
-//
-//  Created on [Current Date].
-//
-
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -188,3 +181,4 @@ struct ShareHelper {
     .padding()
     .environment(\.services, ServicesContainer.preview)
 }
+

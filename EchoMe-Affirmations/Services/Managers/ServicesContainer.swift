@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-@Observable
 @MainActor
-class ServicesContainer {
+final class ServicesContainer: ObservableObject {
     let firebaseService: FirebaseService
     let navigationState: NavigationState
     let authManager: AuthenticationManager
     let favoritesManager: FavoritesManager
     let watchConnectivityManager: WatchConnectivityManager
     let speechManager: SpeechManager
+    let affirmationCache: AffirmationCacheManager 
     
     init(
         firebaseService: FirebaseService? = nil,
@@ -23,13 +23,11 @@ class ServicesContainer {
         authManager: AuthenticationManager? = nil,
         favoritesManager: FavoritesManager? = nil,
         watchConnectivityManager: WatchConnectivityManager? = nil,
-        speechManager: SpeechManager? = nil
+        speechManager: SpeechManager? = nil,
+        affirmationCache: AffirmationCacheManager? = nil
     ) {
-        // Create shared Firebase service
-        self.firebaseService = firebaseService ?? FirebaseService()
-        
-        // Configure Firebase
-        self.firebaseService.configure()
+        // Use singleton for Firebase
+        self.firebaseService = firebaseService ?? FirebaseService.shared
         
         // Create services with shared Firebase service
         self.navigationState = navigationState ?? NavigationState()
@@ -37,15 +35,11 @@ class ServicesContainer {
         self.favoritesManager = favoritesManager ?? FavoritesManager(firebaseService: self.firebaseService)
         self.watchConnectivityManager = watchConnectivityManager ?? WatchConnectivityManager()
         self.speechManager = speechManager ?? SpeechManager()
+        self.affirmationCache = affirmationCache ?? AffirmationCacheManager(firebaseService: self.firebaseService)
         
         // Set up dependencies
         self.authManager.navigationState = self.navigationState
         self.favoritesManager.watchConnectivityManager = self.watchConnectivityManager
-    }
-    
-    deinit {
-        // Clean up Firebase listeners
-        firebaseService.cleanup()
     }
 }
 

@@ -27,14 +27,14 @@ extension Affirmation {
     // Fetch methods using FirebaseService
     @MainActor
     static func fetchByCategories(_ categories: [String], limit: Int, firebaseService: FirebaseService? = nil) async throws -> [Affirmation] {
-        let service = firebaseService ?? FirebaseService()
+        let service = firebaseService ?? FirebaseService.shared
         let data = try await service.fetchAffirmations(categories: categories, limit: limit)
         return data.compactMap { Affirmation.from(data: $0) }
     }
     
     @MainActor
     static func fetchRandom(limit: Int, firebaseService: FirebaseService? = nil) async throws -> [Affirmation] {
-        let service = firebaseService ?? FirebaseService()
+        let service = firebaseService ?? FirebaseService.shared
         let data = try await service.fetchAffirmations(categories: nil, limit: limit)
         return data.compactMap { Affirmation.from(data: $0) }
     }

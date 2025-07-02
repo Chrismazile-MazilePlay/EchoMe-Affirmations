@@ -32,16 +32,16 @@ struct Affirmation: Identifiable, Codable, Equatable {
         id: String = UUID().uuidString,
         text: String,
         categories: [String] = [],
-        tone: String = "gentle",
-        length: String = "short",
+        tone: String? = nil,
+        length: String? = nil,
         isActive: Bool = true,
         createdAt: Date? = Date()
     ) {
         self.id = id
         self.text = text
         self.categories = categories
-        self.tone = tone
-        self.length = length
+        self.tone = tone ?? "gentle"
+        self.length = length ?? "short"
         self.isActive = isActive
         self.createdAt = createdAt
     }

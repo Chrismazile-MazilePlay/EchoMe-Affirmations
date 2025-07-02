@@ -38,41 +38,70 @@ struct FavoriteData {
     let savedAt: Date
 }
 
+// MARK: - Listener Wrapper
+// Wraps Firebase listeners to hide implementation details
+public class FirebaseListener {
+    private let removeHandler: () -> Void
+    
+    fileprivate init(removeHandler: @escaping () -> Void) {
+        self.removeHandler = removeHandler
+    }
+    
+    public func remove() {
+        removeHandler()
+    }
+}
+
 // MARK: - Firebase Service
 
 @Observable
 @MainActor
 public class FirebaseService {
+    // MARK: - Singleton
+    static let shared = FirebaseService()
+    
     // MARK: - Properties
     private var auth: Auth?
     private var db: Firestore?
     private var authStateListener: AuthStateDidChangeListenerHandle?
-    private var activeListeners: [ListenerRegistration] = []
+    private var firestoreListeners: [ListenerRegistration] = []
     
     // Observable state
     var currentAuthUser: AuthUser?
-    var isConfigured = false
     
     // MARK: - Initialization
-    public init() {}
-    
-    // MARK: - Configuration
-    func configure() {
-        guard !isConfigured else { return }
-        
+    private init() {
+        // Initialize Firebase services only after Firebase is configured
         if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != "1" {
-            FirebaseApp.configure()
-            auth = Auth.auth()
-            db = Firestore.firestore()
-            isConfigured = true
+            // Firebase should already be configured by AppDelegate
+            if FirebaseApp.app() != nil {
+                auth = Auth.auth()
+                db = Firestore.firestore()
+                print("🔥 FirebaseService initialized with Auth and Firestore")
+            } else {
+                print("⚠️ FirebaseApp not configured yet")
+            }
         }
     }
     
     // MARK: - Cleanup
-    func cleanup() {
-        authStateListener?.remove()
-        activeListeners.forEach { $0.remove() }
-        activeListeners.removeAll()
+    nonisolated func cleanup() {
+        Task { @MainActor in
+            // Remove auth listener
+            if let authListener = authStateListener {
+                Auth.auth().removeStateDidChangeListener(authListener)
+                self.authStateListener = nil
+            }
+            
+            // Remove Firestore listeners
+            firestoreListeners.forEach { $0.remove() }
+            firestoreListeners.removeAll()
+        }
+    }
+    
+    // MARK: - Remove Listener
+    func removeListener(_ listener: FirebaseListener) {
+        listener.remove()
     }
     
     // MARK: - Authentication
@@ -148,7 +177,7 @@ public class FirebaseService {
         try await db.collection("users").document(userId).setData(userData)
     }
     
-    func listenToUserProfile(userId: String, handler: @escaping (UserProfileData?) -> Void) -> ListenerRegistration? {
+    func listenToUserProfile(userId: String, handler: @escaping (UserProfileData?) -> Void) -> FirebaseListener? {
         guard let db = db else { return nil }
         
         let listener = db.collection("users").document(userId)
@@ -175,8 +204,13 @@ public class FirebaseService {
                 handler(profile)
             }
         
-        activeListeners.append(listener)
-        return listener
+        firestoreListeners.append(listener)
+        
+        // Return wrapped listener
+        return FirebaseListener { [weak self] in
+            listener.remove()
+            self?.firestoreListeners.removeAll { $0 === listener }
+        }
     }
     
     func updateUserData(userId: String, updates: [String: Any]) async throws {
@@ -203,7 +237,7 @@ public class FirebaseService {
     
     // MARK: - Favorites
     
-    func listenToFavorites(userId: String, handler: @escaping ([FavoriteData]) -> Void) -> ListenerRegistration? {
+    func listenToFavorites(userId: String, handler: @escaping ([FavoriteData]) -> Void) -> FirebaseListener? {
         guard let db = db else { return nil }
         
         let listener = db.collection("users").document(userId)
@@ -230,8 +264,13 @@ public class FirebaseService {
                 handler(favorites)
             }
         
-        activeListeners.append(listener)
-        return listener
+        firestoreListeners.append(listener)
+        
+        // Return wrapped listener
+        return FirebaseListener { [weak self] in
+            listener.remove()
+            self?.firestoreListeners.removeAll { $0 === listener }
+        }
     }
     
     func addFavorite(userId: String, affirmationId: String, text: String) async throws {
@@ -280,12 +319,6 @@ public class FirebaseService {
             data["id"] = doc.documentID
             return data
         }
-    }
-    
-    // MARK: - Remove Listener
-    func removeListener(_ listener: ListenerRegistration) {
-        listener.remove()
-        activeListeners.removeAll { $0 === listener }
     }
 }
 

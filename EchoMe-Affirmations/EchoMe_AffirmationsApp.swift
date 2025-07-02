@@ -8,13 +8,15 @@
 import SwiftUI
 
 @main
-struct EchoMe_AffirmationsApp: App {
-    @State private var services = ServicesContainer()
+struct EchoMeAffirmationsApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var services = ServicesContainer()
     
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(\.services, services)
+                .modelContainer(for: CachedAffirmation.self)
         }
     }
 }

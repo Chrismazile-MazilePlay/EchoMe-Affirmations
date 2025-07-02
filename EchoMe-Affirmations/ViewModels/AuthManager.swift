@@ -30,12 +30,12 @@ public class AuthenticationManager {
     
     // MARK: - Private Properties
     private let firebaseService: FirebaseService
-    private var userProfileListener: ListenerRegistration?
+    private var userProfileListener: FirebaseListener?
     private let isPreview: Bool
     
     // MARK: - Initialization
     public init(firebaseService: FirebaseService? = nil, isPreview: Bool = false) {
-        self.firebaseService = firebaseService ?? FirebaseService()
+        self.firebaseService = firebaseService ?? FirebaseService.shared
         self.isPreview = isPreview
         
         if !isPreview && !MockDataProvider.isPreview {

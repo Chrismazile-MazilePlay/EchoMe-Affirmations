@@ -5,264 +5,233 @@
 //  Created by Christopher Mazile on 6/30/25.
 //
 
-//
-//  ContentView.swift
-//  EchoMe-Affirmations
-//
-//  Created by Christopher Mazile on 6/30/25.
-//
-
 import SwiftUI
-import FirebaseFirestore
-import FirebaseAuth
-import WatchConnectivity
 
 struct ContentView: View {
     @Environment(\.services) private var services
+    @Environment(\.modelContext) private var modelContext
     
-    // Access managers through services
-    private var authManager: AuthenticationManager { services.authManager }
-    private var favoritesManager: FavoritesManager { services.favoritesManager }
-    private var watchConnectivityManager: WatchConnectivityManager { services.watchConnectivityManager }
-    
+    // MARK: - State
     @State private var affirmations: [Affirmation] = []
-    @State private var isLoading = true
+    @State private var currentIndex = 0
+    @State private var errorMessage: String?
     @State private var userCategories: [String] = []
+    
+    // MARK: - Computed Properties
+    private var currentAffirmation: Affirmation? {
+        guard !affirmations.isEmpty && currentIndex < affirmations.count else { return nil }
+        return affirmations[currentIndex]
+    }
     
     var body: some View {
         NavigationStack {
-            mainContent
-                .navigationTitle("Your Daily Affirmations")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        navigationMenu
-                    }
-                }
-                .onAppear { handleOnAppear() }
-                .onDisappear { handleOnDisappear() }
-        }
-    }
-    
-    // MARK: - View Components
-    
-    private var mainContent: some View {
-        ZStack(alignment: .top) {
-            if isLoading {
-                loadingView
-            } else if affirmations.isEmpty {
-                emptyStateView
-            } else {
-                affirmationsList
-            }
-        }
-    }
-    
-    private var loadingView: some View {
-        ProgressView()
-            .scaleEffect(1.5)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    private var emptyStateView: some View {
-        ContentEmptyState()
-    }
-    
-    private var affirmationsList: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                categoryTagsSection
-                affirmationsSection
-            }
-            .frame(maxWidth: .infinity)
-        }
-    }
-    
-    private var categoryTagsSection: some View {
-        Group {
-            if !userCategories.isEmpty {
-                CategoryTagsRow(categories: userCategories)
-                    .padding(.top, 12)
-                    .padding(.bottom, 16)
-            }
-        }
-    }
-    
-    private var affirmationsSection: some View {
-        VStack(spacing: 15) {
-            ForEach(affirmations) { affirmation in
-                AffirmationCard(
-                    id: affirmation.id,
-                    text: affirmation.text
+            ZStack {
+                // Background gradient
+                LinearGradient(
+                    colors: [Color.purple.opacity(0.8), Color.blue.opacity(0.6)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Header
+                    HStack {
+                        Text("Daily Affirmations")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        NavigationLink(destination: ProfileView()) {
+                            Image(systemName: "person.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 50)
+                    
+                    // Main content
+                    if !affirmations.isEmpty {
+                        // Affirmation cards
+                        TabView(selection: $currentIndex) {
+                            ForEach(Array(affirmations.enumerated()), id: \.element.id) { index, affirmation in
+                                AffirmationCard(
+                                    affirmation: affirmation,
+                                    isFavorite: services.favoritesManager.favoriteIds.contains(affirmation.id),
+                                    onFavoriteToggle: { toggleFavorite(affirmation) },
+                                    onSpeak: { speakAffirmation(affirmation) }
+                                )
+                                .tag(index)
+                            }
+                        }
+                        .tabViewStyle(.page(indexDisplayMode: .never))
+                        .animation(.easeInOut, value: currentIndex)
+                        
+                        // Page indicators
+                        HStack(spacing: 8) {
+                            ForEach(0..<min(affirmations.count, 10), id: \.self) { index in
+                                Circle()
+                                    .fill(index == currentIndex % 10 ? Color.white : Color.white.opacity(0.5))
+                                    .frame(width: 8, height: 8)
+                                    .animation(.easeInOut, value: currentIndex)
+                            }
+                        }
+                        .padding(.vertical, 20)
+                        
+                    } else if services.affirmationCache.isLoading {
+                        // Loading state
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(1.5)
+                            
+                            Text("Loading affirmations...")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        
+                    } else {
+                        // Empty state
+                        EmptyStateView()
+                    }
+                    
+                    // Navigation buttons
+                    HStack(spacing: 50) {
+                        // Favorites button
+                        NavigationLink(destination: FavoritesView()) {
+                            VStack {
+                                Image(systemName: "heart.fill")
+                                    .font(.title2)
+                                Text("Favorites")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white)
+                        }
+                        
+                        // Refresh button
+                        Button(action: refreshAffirmations) {
+                            VStack {
+                                Image(systemName: "arrow.clockwise")
+                                    .font(.title2)
+                                Text("Refresh")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white)
+                        }
+                        
+                        // Settings button
+                        NavigationLink(destination: VoiceSettingsView()) {
+                            VStack {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.title2)
+                                Text("Settings")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white)
+                        }
+                    }
+                    .padding(.bottom, 30)
+                }
+            }
+            .alert("Error", isPresented: .constant(errorMessage != nil)) {
+                Button("OK") { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
             }
         }
-        .padding(.horizontal)
-        .padding(.bottom, 20)
-    }
-    
-    private var navigationMenu: some View {
-        Menu {
-            menuContent
-        } label: {
-            Image(systemName: "ellipsis.circle")
+        .onAppear {
+            setupView()
+        }
+        .onDisappear {
+            services.favoritesManager.stopListening()
+        }
+        .onChange(of: services.authManager.userProfile?.preferences.categories) { _, newCategories in
+            if let categories = newCategories {
+                userCategories = categories
+                Task {
+                    await loadAffirmations(forceRefresh: true)
+                }
+            }
         }
     }
     
-    private var menuContent: some View {
-        Group {
-            NavigationLink {
-                FavoritesView()
-            } label: {
-                Label("My Favorites", systemImage: "heart.fill")
-            }
+    // MARK: - Setup
+    private func setupView() {
+        // Load user preferences
+        if let preferences = services.authManager.userProfile?.preferences {
+            userCategories = preferences.categories
+        }
+        
+        // Use cached affirmations immediately if available
+        if !services.affirmationCache.cachedAffirmations.isEmpty {
+            affirmations = services.affirmationCache.cachedAffirmations
+            sendAffirmationsToWatch()
+        }
+        
+        // Start listeners
+        services.favoritesManager.startListening()
+        
+        // Load/refresh affirmations in background
+        Task {
+            await loadAffirmations()
+        }
+    }
+    
+    // MARK: - Data Loading
+    private func loadAffirmations(forceRefresh: Bool = false) async {
+        await services.affirmationCache.loadAffirmations(
+            categories: userCategories,
+            forceRefresh: forceRefresh
+        )
+        
+        // Update UI with fresh data
+        await MainActor.run {
+            self.affirmations = services.affirmationCache.cachedAffirmations
             
-            NavigationLink {
-                VoiceSettingsView()
-            } label: {
-                Label("Voice Settings", systemImage: "speaker.wave.3")
-            }
-            
-            NavigationLink {
-                ProfileView()
-            } label: {
-                Label("Profile", systemImage: "person.circle")
-            }
-            
-            Divider()
-            
-            Button(action: { authManager.signOut() }) {
-                Label("Sign Out", systemImage: "arrow.right.square")
+            // Send to watch
+            if !affirmations.isEmpty {
+                sendAffirmationsToWatch()
             }
         }
     }
     
     // MARK: - Actions
-    
-    private func handleOnAppear() {
-        loadContent()
-        if !MockDataProvider.isPreview {
-            favoritesManager.startListening()
+    private func refreshAffirmations() {
+        Task {
+            await loadAffirmations(forceRefresh: true)
         }
     }
     
-    private func handleOnDisappear() {
-        if !MockDataProvider.isPreview {
-            favoritesManager.stopListening()
-        }
-    }
-    
-    private func loadContent() {
-        if MockDataProvider.isPreview {
-            loadMockData()
-        } else {
-            Task {
-                await fetchPersonalizedAffirmations()
+    private func toggleFavorite(_ affirmation: Affirmation) {
+        Task {
+            do {
+                if services.favoritesManager.favoriteIds.contains(affirmation.id) {
+                    try await services.favoritesManager.toggleFavorite(affirmationId: affirmation.id, affirmationText: affirmation.text)
+                }
+            } catch {
+                errorMessage = "Failed to update favorite: \(error.localizedDescription)"
             }
         }
     }
     
-    private func loadMockData() {
-        MockDataProvider.simulateLoading(seconds: 0.3) {
-            self.affirmations = MockDataProvider.shared.getDailyAffirmations()
-            self.userCategories = MockDataProvider.shared.getUserCategories()
-            self.isLoading = false
-            sendAffirmationsToWatch()
-        }
+    private func speakAffirmation(_ affirmation: Affirmation) {
+        services.speechManager.speak(affirmation.text)
     }
     
-    private func fetchPersonalizedAffirmations() async {
-        guard !MockDataProvider.isPreview else {
-            loadMockData()
-            return
-        }
-        
-        guard let userProfile = authManager.userProfile else {
-            self.isLoading = false
-            return
-        }
-        
-        self.userCategories = userProfile.preferences.categories
-        
-        do {
-            let affirmationLimit = userProfile.preferences.dailyAffirmationCount
-            
-            if !userCategories.isEmpty {
-                self.affirmations = try await Affirmation
-                    .fetchByCategories(userCategories, limit: 10)
-                    .shuffled()
-                    .prefix(affirmationLimit)
-                    .map { $0 }
-            } else {
-                self.affirmations = try await Affirmation
-                    .fetchRandom(limit: affirmationLimit)
-            }
-        } catch {
-            print("Error fetching affirmations: \(error)")
-        }
-        
-        self.isLoading = false
-        sendAffirmationsToWatch()
-    }
-    
+    // MARK: - Watch Connectivity
     private func sendAffirmationsToWatch() {
         print("📱 Sending \(affirmations.count) affirmations to watch")
-        watchConnectivityManager.sendAffirmationsToWatch(affirmations)
+        services.watchConnectivityManager.sendAffirmationsToWatch(affirmations)
     }
 }
 
-// MARK: - Supporting Views
-
-struct ContentEmptyState: View {
-    var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
-            
-            Text("No affirmations found")
-                .font(.title3)
-                .foregroundColor(.gray)
-            
-            Text("Try updating your preferences")
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-struct CategoryTagsRow: View {
-    let categories: [String]
-    
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack {
-                ForEach(categories, id: \.self) { category in
-                    CategoryTag(category: category)
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-}
-
-struct CategoryTag: View {
-    let category: String
-    
-    var body: some View {
-        Text(category.capitalized)
-            .font(.caption)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(Color.blue.opacity(0.2))
-            .cornerRadius(15)
-    }
-}
-
+// MARK: - Preview
 #Preview {
-    NavigationStack {
-        ContentView()
-    }
-    .environment(\.services, ServicesContainer.preview)
+    ContentView()
+        .environment(\.services, ServicesContainer.previewWithMockData)
+        .modelContainer(for: CachedAffirmation.self, inMemory: true)
 }

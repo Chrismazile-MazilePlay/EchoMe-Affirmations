@@ -8,9 +8,6 @@
 import Foundation
 import Observation
 
-// Type alias to avoid importing Firebase
-typealias ListenerRegistration = Any
-
 @Observable
 @MainActor
 public class FavoritesManager {
@@ -21,11 +18,11 @@ public class FavoritesManager {
     // Dependencies
     weak var watchConnectivityManager: WatchConnectivityManager?
     private let firebaseService: FirebaseService
-    private var favoritesListener: ListenerRegistration?
+    private var favoritesListener: FirebaseListener?
     
     // Public initializer
     public init(firebaseService: FirebaseService? = nil) {
-        self.firebaseService = firebaseService ?? FirebaseService()
+        self.firebaseService = firebaseService ?? FirebaseService.shared
     }
     
     // Start listening to favorites changes
