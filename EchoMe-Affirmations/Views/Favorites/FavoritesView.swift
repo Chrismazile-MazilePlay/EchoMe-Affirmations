@@ -120,6 +120,9 @@ struct FavoritesView: View {
     }
 }
 
-#Preview("Favorites with Items") {
-    FavoritesView()
+#Preview {
+    NavigationStack {
+        FavoritesView()
+    }
+    .environment(\.services, ServicesContainer.preview)
 }

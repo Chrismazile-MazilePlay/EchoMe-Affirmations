@@ -8,7 +8,9 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @Environment(AuthenticationManager.self) private var authManager
+    @Environment(\.services) private var services
+    private var authManager: AuthenticationManager { services.authManager }
+    
     @State private var showingEditName = false
     @State private var editedName = ""
     
@@ -242,5 +244,5 @@ struct EditDisplayNameView: View {
     NavigationStack {
         ProfileView()
     }
-    .environment(AuthenticationManager.previewAuthenticated)
+    .environment(\.services, ServicesContainer.preview)
 }

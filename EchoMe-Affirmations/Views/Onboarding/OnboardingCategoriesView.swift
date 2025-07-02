@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct OnboardingCategoriesView: View {
-    @Environment(AuthenticationManager.self) private var authManager
+    @Environment(\.services) private var services
     @Environment(\.dismiss) private var dismiss
+    
+    private var authManager: AuthenticationManager { services.authManager }
     
     let isUpdatingPreferences: Bool
     
@@ -317,5 +319,5 @@ struct SaveCategoriesButton: View {
 
 #Preview {
     OnboardingCategoriesView()
-        .environment(AuthenticationManager.previewNeedsOnboarding)
+        .environment(\.services, ServicesContainer.previewNeedsOnboarding)
 }

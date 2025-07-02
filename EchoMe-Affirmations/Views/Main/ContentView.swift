@@ -5,6 +5,13 @@
 //  Created by Christopher Mazile on 6/30/25.
 //
 
+//
+//  ContentView.swift
+//  EchoMe-Affirmations
+//
+//  Created by Christopher Mazile on 6/30/25.
+//
+
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
@@ -12,14 +19,15 @@ import WatchConnectivity
 
 struct ContentView: View {
     @Environment(\.services) private var services
-    @State private var affirmations: [Affirmation] = []
-    @State private var isLoading = true
-    @State private var userCategories: [String] = []
     
-    // Easy access to managers
+    // Access managers through services
     private var authManager: AuthenticationManager { services.authManager }
     private var favoritesManager: FavoritesManager { services.favoritesManager }
     private var watchConnectivityManager: WatchConnectivityManager { services.watchConnectivityManager }
+    
+    @State private var affirmations: [Affirmation] = []
+    @State private var isLoading = true
+    @State private var userCategories: [String] = []
     
     var body: some View {
         NavigationStack {
@@ -256,10 +264,5 @@ struct CategoryTag: View {
     NavigationStack {
         ContentView()
     }
-    .environment(AuthenticationManager.previewAuthenticated)
-//
-//
-//    .environment(\.favoritesManager, FavoritesManager())
-//    .environment(\.watchConnectivityManager, WatchConnectivityManager())
-//    .environment(\.speechManager, SpeechManager())
+    .environment(\.services, ServicesContainer.preview)
 }

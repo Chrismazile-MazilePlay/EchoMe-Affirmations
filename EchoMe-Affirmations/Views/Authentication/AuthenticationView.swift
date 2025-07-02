@@ -6,75 +6,103 @@
 //
 
 import SwiftUI
-import FirebaseAuth
 
 struct AuthenticationView: View {
-    @Environment(AuthenticationManager.self) private var authManager
+    @Environment(\.services) private var services
+    private var authManager: AuthenticationManager { services.authManager }
+    
+    @State private var isSignUp = false
     @State private var email = ""
     @State private var password = ""
-    @State private var isSignUp = false
-    @State private var showingResetPassword = false
+    @State private var confirmPassword = ""
+    @State private var showError = false
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("EchoMe")
-                .font(.largeTitle)
-                .bold()
-            
-            Text(isSignUp ? "Create Account" : "Sign In")
-                .font(.title2)
-            
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .keyboardType(.emailAddress)
-            
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            if let errorMessage = authManager.errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.caption)
-            }
-            
-            Button(action: authenticate) {
-                if authManager.isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                } else {
-                    Text(isSignUp ? "Create Account" : "Sign In")
-                }
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            .disabled(authManager.isLoading || email.isEmpty || password.isEmpty)
-            
-            VStack(spacing: 15) {
-                Button(action: { isSignUp.toggle() }) {
-                    Text(isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up")
-                        .foregroundColor(.blue)
-                }
+        NavigationStack {
+            VStack(spacing: 20) {
+                // Logo
+                Image(systemName: "quote.bubble.fill")
+                    .font(.system(size: 80))
+                    .foregroundColor(.blue)
+                    .padding(.top, 50)
                 
-                if !isSignUp {
-                    Button(action: { showingResetPassword = true }) {
-                        Text("Forgot Password?")
-                            .foregroundColor(.gray)
-                            .font(.caption)
+                Text("EchoMe")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text(isSignUp ? "Create your account" : "Welcome back")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                // Form fields
+                VStack(spacing: 16) {
+                    TextField("Email", text: $email)
+                        .textContentType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    
+                    SecureField("Password", text: $password)
+                        .textContentType(isSignUp ? .newPassword : .password)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    
+                    if isSignUp {
+                        SecureField("Confirm Password", text: $confirmPassword)
+                            .textContentType(.newPassword)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
                     }
                 }
+                .padding(.horizontal)
+                
+                // Action button
+                Button(action: authenticate) {
+                    HStack {
+                        if authManager.isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .scaleEffect(0.8)
+                        }
+                        Text(isSignUp ? "Sign Up" : "Sign In")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(isFormValid ? Color.blue : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .disabled(!isFormValid || authManager.isLoading)
+                .padding(.horizontal)
+                
+                // Toggle auth mode
+                Button(action: { isSignUp.toggle() }) {
+                    Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                }
+                .padding(.top)
+                
+                Spacer()
             }
-        }
-        .padding()
-        .sheet(isPresented: $showingResetPassword) {
-            ResetPasswordView()
+            .alert("Error", isPresented: $showError) {
+                Button("OK") { }
+            } message: {
+                Text(authManager.errorMessage ?? "An error occurred")
+            }
         }
     }
     
-    func authenticate() {
+    private var isFormValid: Bool {
+        !email.isEmpty && !password.isEmpty && (!isSignUp || password == confirmPassword)
+    }
+    
+    private func authenticate() {
         Task {
             do {
                 if isSignUp {
@@ -83,87 +111,18 @@ struct AuthenticationView: View {
                     try await authManager.signIn(email: email, password: password)
                 }
             } catch {
-                // Error is handled by authManager
+                showError = true
             }
-        }
-    }
-}
-
-struct ResetPasswordView: View {
-    @Environment(AuthenticationManager.self) private var authManager
-    @Environment(\.dismiss) private var dismiss
-    @State private var email = ""
-    @State private var message = ""
-    @State private var isLoading = false
-    
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 20) {
-                Text("Reset Password")
-                    .font(.title2)
-                    .padding(.top)
-                
-                Text("Enter your email and we'll send you a reset link")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-                
-                if !message.isEmpty {
-                    Text(message)
-                        .font(.caption)
-                        .foregroundColor(message.contains("sent") ? .green : .red)
-                }
-                
-                Button(action: resetPassword) {
-                    if isLoading {
-                        ProgressView()
-                    } else {
-                        Text("Send Reset Link")
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .disabled(isLoading || email.isEmpty)
-                
-                Spacer()
-            }
-            .padding()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    func resetPassword() {
-        isLoading = true
-        Task {
-            do {
-                try await authManager.resetPassword(email: email)
-                message = "Reset link sent to \(email)"
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    dismiss()
-                }
-            } catch {
-                message = error.localizedDescription
-            }
-            isLoading = false
         }
     }
 }
 
 #Preview("Sign In") {
     AuthenticationView()
-        .environment(AuthenticationManager.previewUnauthenticated)
-} 
+        .environment(\.services, ServicesContainer.previewUnauthenticated)
+}
+
+#Preview("Sign Up") {
+    AuthenticationView()
+        .environment(\.services, ServicesContainer.previewUnauthenticated)
+}

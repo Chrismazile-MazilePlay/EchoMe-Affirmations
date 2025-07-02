@@ -5,23 +5,30 @@
 //  Created by Christopher Mazile on 7/1/25.
 //
 
+//
+//  AffirmationCard.swift
+//  EchoMe-Affirmations
+//
+//  Created on [Current Date].
+//
+
 import SwiftUI
 import FirebaseFirestore
 import FirebaseAuth
 
 struct AffirmationCard: View {
-    @Environment(AuthenticationManager.self) private var authManager
     @Environment(\.services) private var services
+    
+    // Access managers through services
+    private var authManager: AuthenticationManager { services.authManager }
+    private var favoritesManager: FavoritesManager { services.favoritesManager }
+    private var speechManager: SpeechManager { services.speechManager }
     
     let id: String
     let text: String
     
     @State private var isAnimatingHeart = false
     @State private var userVoiceProfile: VoiceProfile?
-    
-    // Easy access to managers
-    private var favoritesManager: FavoritesManager { services.favoritesManager }
-    private var speechManager: SpeechManager { services.speechManager }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -179,5 +186,5 @@ struct ShareHelper {
         text: "I am capable of achieving great things in my life"
     )
     .padding()
-    .environment(AuthenticationManager.previewAuthenticated)
+    .environment(\.services, ServicesContainer.preview)
 }

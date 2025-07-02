@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct VoiceSettingsView: View {
-    @Environment(AuthenticationManager.self) private var authManager
     @Environment(\.services) private var services
+    
+    // Access managers through services
+    private var authManager: AuthenticationManager { services.authManager }
+    private var speechManager: SpeechManager { services.speechManager }
     
     @State private var selectedVoice: String = ""
     @State private var isSaving = false
     @State private var showingSavedAlert = false
-    
-    // Easy access to speech manager
-    private var speechManager: SpeechManager { services.speechManager }
-    
+
     private let sampleText = "I am confident, capable, and ready to embrace all the wonderful opportunities coming my way."
     
     var body: some View {
@@ -194,5 +194,5 @@ struct VoiceOptionRow: View {
     NavigationStack {
         VoiceSettingsView()
     }
-    .environment(AuthenticationManager.previewAuthenticated)
+    .environment(\.services, ServicesContainer.preview)
 }
