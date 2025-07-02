@@ -6,9 +6,10 @@
 //
 
 import Foundation
-import FirebaseFirestore
-import FirebaseAuth
 import Observation
+
+// Type alias to avoid importing Firebase
+typealias ListenerRegistration = Any
 
 @Observable
 @MainActor
@@ -19,50 +20,42 @@ public class FavoritesManager {
     
     // Dependencies
     weak var watchConnectivityManager: WatchConnectivityManager?
-    
+    private let firebaseService: FirebaseService
     private var favoritesListener: ListenerRegistration?
     
     // Public initializer
-    public init() {}
+    public init(firebaseService: FirebaseService? = nil) {
+        self.firebaseService = firebaseService ?? FirebaseService()
+    }
     
     // Start listening to favorites changes
     func startListening() {
         guard !isListening,
-              let userId = Auth.auth().currentUser?.uid else { return }
+              let userId = firebaseService.currentAuthUser?.uid else { return }
         
         isListening = true
         
-        favoritesListener = Firestore.firestore()
-            .collection("users")
-            .document(userId)
-            .collection("favorites")
-            .addSnapshotListener { [weak self] snapshot, error in
+        favoritesListener = firebaseService.listenToFavorites(userId: userId) { [weak self] favorites in
+            Task { @MainActor in
                 guard let self = self else { return }
                 
-                if let error = error {
-                    print("❌ Error listening to favorites: \(error)")
-                    return
-                }
-                
-                guard let documents = snapshot?.documents else { return }
-                
                 // Update favorite IDs
-                let ids = Set(documents.map { $0.documentID })
+                let ids = Set(favorites.map { $0.affirmationId })
+                self.favoriteIds = ids
+                print("💖 Updated favorites: \(ids.count) items")
                 
-                Task { @MainActor in
-                    self.favoriteIds = ids
-                    print("💖 Updated favorites: \(ids.count) items")
-                    
-                    // Send updated favorites to Watch
-                    self.watchConnectivityManager?.sendFavoriteIds(Array(ids))
-                }
+                // Send updated favorites to Watch
+                self.watchConnectivityManager?.sendFavoriteIds(Array(ids))
             }
+        }
     }
     
     // Stop listening
     func stopListening() {
-        favoritesListener?.remove()
-        favoritesListener = nil
+        if let listener = favoritesListener {
+            firebaseService.removeListener(listener)
+            favoritesListener = nil
+        }
         isListening = false
     }
     
@@ -73,32 +66,30 @@ public class FavoritesManager {
     
     // Toggle favorite
     func toggleFavorite(affirmationId: String, affirmationText: String, completion: ((Bool) -> Void)? = nil) {
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = firebaseService.currentAuthUser?.uid else { return }
         
         let isFavorite = isFavorite(affirmationId)
-        let db = Firestore.firestore()
-        let favoriteRef = db.collection("users").document(userId)
-            .collection("favorites").document(affirmationId)
         
-        if isFavorite {
-            // Remove from favorites
-            favoriteRef.delete { error in
-                if error == nil {
+        Task {
+            do {
+                if isFavorite {
+                    try await firebaseService.removeFavorite(
+                        userId: userId,
+                        affirmationId: affirmationId
+                    )
                     completion?(false)
                     print("💔 Removed from favorites")
-                }
-            }
-        } else {
-            // Add to favorites
-            favoriteRef.setData([
-                "affirmationId": affirmationId,
-                "text": affirmationText,
-                "savedAt": Date()
-            ]) { error in
-                if error == nil {
+                } else {
+                    try await firebaseService.addFavorite(
+                        userId: userId,
+                        affirmationId: affirmationId,
+                        text: affirmationText
+                    )
                     completion?(true)
                     print("💖 Added to favorites")
                 }
+            } catch {
+                print("Error toggling favorite: \(error)")
             }
         }
     }

@@ -10,6 +10,7 @@ import SwiftUI
 @Observable
 @MainActor
 class ServicesContainer {
+    let firebaseService: FirebaseService
     let navigationState: NavigationState
     let authManager: AuthenticationManager
     let favoritesManager: FavoritesManager
@@ -17,21 +18,34 @@ class ServicesContainer {
     let speechManager: SpeechManager
     
     init(
+        firebaseService: FirebaseService? = nil,
         navigationState: NavigationState? = nil,
         authManager: AuthenticationManager? = nil,
         favoritesManager: FavoritesManager? = nil,
         watchConnectivityManager: WatchConnectivityManager? = nil,
         speechManager: SpeechManager? = nil
     ) {
+        // Create shared Firebase service
+        self.firebaseService = firebaseService ?? FirebaseService()
+        
+        // Configure Firebase
+        self.firebaseService.configure()
+        
+        // Create services with shared Firebase service
         self.navigationState = navigationState ?? NavigationState()
-        self.authManager = authManager ?? AuthenticationManager()
-        self.favoritesManager = favoritesManager ?? FavoritesManager()
+        self.authManager = authManager ?? AuthenticationManager(firebaseService: self.firebaseService)
+        self.favoritesManager = favoritesManager ?? FavoritesManager(firebaseService: self.firebaseService)
         self.watchConnectivityManager = watchConnectivityManager ?? WatchConnectivityManager()
         self.speechManager = speechManager ?? SpeechManager()
         
         // Set up dependencies
         self.authManager.navigationState = self.navigationState
         self.favoritesManager.watchConnectivityManager = self.watchConnectivityManager
+    }
+    
+    deinit {
+        // Clean up Firebase listeners
+        firebaseService.cleanup()
     }
 }
 

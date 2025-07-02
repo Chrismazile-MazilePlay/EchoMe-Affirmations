@@ -5,9 +5,14 @@
 //  Created by Christopher Mazile on 7/1/25.
 //
 
+//
+//  AuthManager.swift
+//  EchoMe-Affirmations
+//
+//  Created by Christopher Mazile on 7/1/25.
+//
+
 import Foundation
-import FirebaseAuth
-import FirebaseFirestore
 import Observation
 import SwiftUI
 
@@ -15,8 +20,8 @@ import SwiftUI
 @MainActor
 public class AuthenticationManager {
     // MARK: - Properties
-    var currentUser: FirebaseAuth.User?  // Firebase auth user
-    var userProfile: User?  // Our custom user model
+    var currentUser: AuthUser?
+    var userProfile: User?
     var isLoading = false
     var errorMessage: String?
     
@@ -24,15 +29,15 @@ public class AuthenticationManager {
     weak var navigationState: NavigationState?
     
     // MARK: - Private Properties
-    private var authStateListener: AuthStateDidChangeListenerHandle?
+    private let firebaseService: FirebaseService
     private var userProfileListener: ListenerRegistration?
     private let isPreview: Bool
     
-    // MARK: - Initialization (Changed to public)
-    public init(isPreview: Bool = false) {
+    // MARK: - Initialization
+    public init(firebaseService: FirebaseService? = nil, isPreview: Bool = false) {
+        self.firebaseService = firebaseService ?? FirebaseService()
         self.isPreview = isPreview
         
-        // Only setup Firebase listeners if not in preview
         if !isPreview && !MockDataProvider.isPreview {
             Task {
                 await setupAuthStateListener()
@@ -54,30 +59,31 @@ public class AuthenticationManager {
     
     // MARK: - Cleanup
     func cleanup() {
-        if let listener = authStateListener {
-            Auth.auth().removeStateDidChangeListener(listener)
-            authStateListener = nil
+        if let listener = userProfileListener {
+            firebaseService.removeListener(listener)
+            userProfileListener = nil
         }
-        userProfileListener?.remove()
-        userProfileListener = nil
     }
     
     // MARK: - Auth State Management
     private func setupAuthStateListener() async {
-        authStateListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        firebaseService.startAuthStateListener { [weak self] authUser in
             Task { @MainActor in
                 guard let self = self else { return }
                 
-                self.currentUser = user
+                self.currentUser = authUser
                 
-                if let user = user {
+                if let authUser = authUser {
                     // User is authenticated - update navigation state instantly
-                    self.navigationState?.setAuthenticated(userId: user.uid)
-                    await self.listenToUserProfile(userId: user.uid)
+                    self.navigationState?.setAuthenticated(userId: authUser.uid)
+                    await self.listenToUserProfile(userId: authUser.uid)
                 } else {
                     // User signed out - clear everything instantly
                     self.navigationState?.signOut()
-                    self.userProfileListener?.remove()
+                    if let listener = self.userProfileListener {
+                        self.firebaseService.removeListener(listener)
+                        self.userProfileListener = nil
+                    }
                     self.userProfile = nil
                 }
             }
@@ -87,68 +93,50 @@ public class AuthenticationManager {
     // MARK: - User Profile Management
     private func listenToUserProfile(userId: String) async {
         guard !isPreview else {
-            // In preview, simulate onboarding completed
             navigationState?.setOnboardingCompleted()
             return
         }
         
-        userProfileListener?.remove()
-        
-        let db = Firestore.firestore()
-        userProfileListener = db.collection("users").document(userId)
-            .addSnapshotListener { [weak self] snapshot, error in
-                Task { @MainActor in
-                    guard let self = self else { return }
-                    
-                    if let error = error {
-                        print("Error listening to user profile: \(error)")
-                        return
-                    }
-                    
-                    guard let data = snapshot?.data() else {
-                        self.userProfile = nil
-                        return
-                    }
-                    
-                    // Update onboarding status instantly in navigation state
-                    if let onboardingCompleted = data["onboardingCompleted"] as? Bool {
-                        if onboardingCompleted {
-                            self.navigationState?.setOnboardingCompleted()
-                        }
-                    }
-                    
-                    // Parse preferences
-                    let preferencesData = data["preferences"] as? [String: Any] ?? [:]
-                    let preferences = UserPreferences(
-                        categories: preferencesData["categories"] as? [String] ?? [],
-                        voiceProfile: preferencesData["voiceProfile"] as? String ?? "Calm & Clear",
-                        dailyAffirmationCount: preferencesData["dailyAffirmationCount"] as? Int ?? 5,
-                        notificationEnabled: preferencesData["notificationEnabled"] as? Bool ?? false,
-                        notificationTime: (preferencesData["notificationTime"] as? Timestamp)?.dateValue(),
-                        theme: AppTheme(rawValue: preferencesData["theme"] as? String ?? "system") ?? .system
-                    )
-                    
-                    // Create custom User model
-                    self.userProfile = User(
-                        id: userId,
-                        email: self.currentUser?.email ?? "",
-                        displayName: data["displayName"] as? String,
-                        preferences: preferences,
-                        createdAt: (data["createdAt"] as? Timestamp)?.dateValue() ?? Date(),
-                        lastActiveAt: (data["lastActiveAt"] as? Timestamp)?.dateValue(),
-                        totalAffirmationsViewed: data["totalAffirmationsViewed"] as? Int ?? 0,
-                        favoriteCount: data["favoriteCount"] as? Int ?? 0,
-                        currentStreak: data["currentStreak"] as? Int ?? 0,
-                        longestStreak: data["longestStreak"] as? Int ?? 0
-                    )
+        userProfileListener = firebaseService.listenToUserProfile(userId: userId) { [weak self] profileData in
+            Task { @MainActor in
+                guard let self = self, let profileData = profileData else { return }
+                
+                // Update onboarding status instantly in navigation state
+                if profileData.onboardingCompleted {
+                    self.navigationState?.setOnboardingCompleted()
                 }
+                
+                // Parse preferences
+                let preferencesData = profileData.preferences
+                let preferences = UserPreferences(
+                    categories: preferencesData["categories"] as? [String] ?? [],
+                    voiceProfile: preferencesData["voiceProfile"] as? String ?? "Calm & Clear",
+                    dailyAffirmationCount: preferencesData["dailyAffirmationCount"] as? Int ?? 5,
+                    notificationEnabled: preferencesData["notificationEnabled"] as? Bool ?? false,
+                    notificationTime: nil, // Handle date parsing as needed
+                    theme: AppTheme(rawValue: preferencesData["theme"] as? String ?? "system") ?? .system
+                )
+                
+                // Create custom User model
+                self.userProfile = User(
+                    id: userId,
+                    email: profileData.email,
+                    displayName: profileData.displayName,
+                    preferences: preferences,
+                    createdAt: profileData.createdAt,
+                    lastActiveAt: profileData.lastActiveAt,
+                    totalAffirmationsViewed: profileData.totalAffirmationsViewed,
+                    favoriteCount: profileData.favoriteCount,
+                    currentStreak: profileData.currentStreak,
+                    longestStreak: profileData.longestStreak
+                )
             }
+        }
     }
     
     // MARK: - Authentication Methods
     func signIn(email: String, password: String) async throws {
         guard !isPreview else {
-            // Simulate success in preview
             navigationState?.setAuthenticated(userId: "preview-user")
             navigationState?.setOnboardingCompleted()
             userProfile = User(
@@ -163,11 +151,13 @@ public class AuthenticationManager {
         errorMessage = nil
         
         do {
-            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            let authUser = try await firebaseService.signIn(email: email, password: password)
             
-            // Navigation state will be updated by auth state listener
-            // Update last active timestamp
-            try await updateLastActive(userId: result.user.uid)
+            // Update last active
+            try await firebaseService.updateUserData(
+                userId: authUser.uid,
+                updates: ["lastActiveAt": Date()]
+            )
             
             isLoading = false
         } catch {
@@ -179,7 +169,6 @@ public class AuthenticationManager {
     
     func signUp(email: String, password: String) async throws {
         guard !isPreview else {
-            // Simulate success in preview
             navigationState?.setAuthenticated(userId: "preview-user")
             userProfile = User(
                 id: "preview-user",
@@ -192,12 +181,11 @@ public class AuthenticationManager {
         errorMessage = nil
         
         do {
-            let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            let authUser = try await firebaseService.signUp(email: email, password: password)
             
             // Create user profile
-            try await createUserProfile(for: result.user, email: email)
+            try await firebaseService.createUserProfile(userId: authUser.uid, email: email)
             
-            // Navigation state will be updated by auth state listener
             isLoading = false
         } catch {
             isLoading = false
@@ -214,67 +202,39 @@ public class AuthenticationManager {
         }
         
         do {
-            try Auth.auth().signOut()
+            try firebaseService.signOut()
             // Navigation state will be updated by auth state listener
         } catch {
             print("Error signing out: \(error)")
         }
     }
     
-    // MARK: - User Profile Creation
-    private func createUserProfile(for user: FirebaseAuth.User, email: String) async throws {
-        guard !isPreview else { return }
-        
-        let userData: [String: Any] = [
-            "email": email,
-            "createdAt": Timestamp(date: Date()),
-            "onboardingCompleted": false,
-            "preferences": [
-                "categories": [],
-                "voiceProfile": "Calm & Clear",
-                "dailyAffirmationCount": 5,
-                "notificationEnabled": false,
-                "theme": "system"
-            ],
-            "totalAffirmationsViewed": 0,
-            "favoriteCount": 0,
-            "currentStreak": 0,
-            "longestStreak": 0
-        ]
-        
-        let db = Firestore.firestore()
-        try await db.collection("users").document(user.uid).setData(userData)
-    }
-    
     // MARK: - Update Methods
     func completeOnboarding(categories: [String]) async throws {
         guard let userId = currentUser?.uid else {
-            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+            throw FirebaseError.notConfigured
         }
         
         guard !isPreview else {
             navigationState?.setOnboardingCompleted()
-            userProfile?.preferences.categories = categories
             return
         }
         
-        let updates: [String: Any] = [
-            "onboardingCompleted": true,
-            "preferences.categories": categories,
-            "lastActiveAt": Timestamp(date: Date())
-        ]
-        
-        let db = Firestore.firestore()
-        try await db.collection("users").document(userId).updateData(updates)
+        try await firebaseService.updateUserData(
+            userId: userId,
+            updates: [
+                "onboardingCompleted": true,
+                "preferences.categories": categories
+            ]
+        )
         
         // Update navigation state instantly
         navigationState?.setOnboardingCompleted()
     }
     
-    // Rest of the methods remain the same...
     func updateUserPreferences(_ preferences: UserPreferences) async throws {
         guard let userId = currentUser?.uid else {
-            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+            throw FirebaseError.notConfigured
         }
         
         guard !isPreview else {
@@ -287,18 +247,15 @@ public class AuthenticationManager {
             "preferences.voiceProfile": preferences.voiceProfile,
             "preferences.dailyAffirmationCount": preferences.dailyAffirmationCount,
             "preferences.notificationEnabled": preferences.notificationEnabled,
-            "preferences.notificationTime": preferences.notificationTime != nil ? Timestamp(date: preferences.notificationTime!) : NSNull(),
-            "preferences.theme": preferences.theme.rawValue,
-            "lastActiveAt": Timestamp(date: Date())
+            "preferences.theme": preferences.theme.rawValue
         ]
         
-        let db = Firestore.firestore()
-        try await db.collection("users").document(userId).updateData(preferencesData)
+        try await firebaseService.updateUserData(userId: userId, updates: preferencesData)
     }
     
     func updateDisplayName(_ displayName: String) async throws {
         guard let userId = currentUser?.uid else {
-            throw NSError(domain: "AuthError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+            throw FirebaseError.notConfigured
         }
         
         guard !isPreview else {
@@ -306,45 +263,26 @@ public class AuthenticationManager {
             return
         }
         
-        let db = Firestore.firestore()
-        try await db.collection("users").document(userId).updateData([
-            "displayName": displayName,
-            "lastActiveAt": Timestamp(date: Date())
-        ])
-    }
-    
-    func incrementAffirmationCount() async throws {
-        guard let userId = currentUser?.uid else { return }
-        guard !isPreview else {
-            userProfile?.totalAffirmationsViewed += 1
-            return
-        }
-        
-        let db = Firestore.firestore()
-        try await db.collection("users").document(userId).updateData([
-            "totalAffirmationsViewed": FieldValue.increment(Int64(1)),
-            "lastActiveAt": Timestamp(date: Date())
-        ])
+        try await firebaseService.updateUserData(
+            userId: userId,
+            updates: ["displayName": displayName]
+        )
     }
     
     func trackAffirmationViewed() async {
-        try? await incrementAffirmationCount()
-    }
-    
-    private func updateLastActive(userId: String) async throws {
-        guard !isPreview else { return }
+        guard let userId = currentUser?.uid, !isPreview else { return }
         
-        let db = Firestore.firestore()
-        try await db.collection("users").document(userId).updateData([
-            "lastActiveAt": Timestamp(date: Date())
-        ])
+        try? await firebaseService.incrementUserStat(
+            userId: userId,
+            field: "totalAffirmationsViewed"
+        )
     }
     
     // MARK: - Reset Password
     func resetPassword(email: String) async throws {
         guard !isPreview else { return }
         
-        try await Auth.auth().sendPasswordReset(withEmail: email)
+        try await firebaseService.resetPassword(email: email)
     }
 }
 

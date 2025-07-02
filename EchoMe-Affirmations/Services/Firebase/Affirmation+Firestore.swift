@@ -6,65 +6,36 @@
 //
 
 import Foundation
-import FirebaseFirestore
 
-// MARK: - Firestore Support
 extension Affirmation {
-    // Convert from Firestore document
-    init?(document: DocumentSnapshot) {
-        guard let data = document.data(),
-              let text = data["text"] as? String else {
-            return nil
-        }
+    // Convert from Firebase data
+    static func from(data: [String: Any]) -> Affirmation? {
+        guard let id = data["id"] as? String,
+              let text = data["text"] as? String else { return nil }
         
-        self.id = document.documentID
-        self.text = text
-        self.categories = data["categories"] as? [String] ?? []
-        self.tone = data["tone"] as? String ?? "gentle"
-        self.length = data["length"] as? String ?? "short"
-        self.isActive = data["isActive"] as? Bool ?? true
-        self.createdAt = (data["createdAt"] as? Timestamp)?.dateValue()
+        return Affirmation(
+            id: id,
+            text: text,
+            categories: data["categories"] as? [String] ?? [],
+            tone: data["tone"] as? String ?? "gentle",
+            length: data["length"] as? String ?? "short",
+            isActive: data["isActive"] as? Bool ?? true,
+            createdAt: nil
+        )
     }
     
-    // Convert to Firestore data
-    var firestoreData: [String: Any] {
-        var data: [String: Any] = [
-            "text": text,
-            "categories": categories,
-            "tone": tone,
-            "length": length,
-            "isActive": isActive
-        ]
-        
-        if let createdAt = createdAt {
-            data["createdAt"] = Timestamp(date: createdAt)
-        }
-        
-        return data
-    }
-}
-
-// MARK: - Firestore Query Helpers
-extension Affirmation {
-    static func fetchByCategories(_ categories: [String], limit: Int = 10) async throws -> [Affirmation] {
-        let db = Firestore.firestore()
-        let snapshot = try await db.collection("affirmations")
-            .whereField("categories", arrayContainsAny: categories)
-            .whereField("isActive", isEqualTo: true)
-            .limit(to: limit)
-            .getDocuments()
-        
-        return snapshot.documents.compactMap { Affirmation(document: $0) }
+    // Fetch methods using FirebaseService
+    @MainActor
+    static func fetchByCategories(_ categories: [String], limit: Int, firebaseService: FirebaseService? = nil) async throws -> [Affirmation] {
+        let service = firebaseService ?? FirebaseService()
+        let data = try await service.fetchAffirmations(categories: categories, limit: limit)
+        return data.compactMap { Affirmation.from(data: $0) }
     }
     
-    static func fetchRandom(limit: Int = 5) async throws -> [Affirmation] {
-        let db = Firestore.firestore()
-        let snapshot = try await db.collection("affirmations")
-            .whereField("isActive", isEqualTo: true)
-            .limit(to: limit * 2) // Fetch more to randomize
-            .getDocuments()
-        
-        let affirmations = snapshot.documents.compactMap { Affirmation(document: $0) }
-        return Array(affirmations.shuffled().prefix(limit))
+    @MainActor
+    static func fetchRandom(limit: Int, firebaseService: FirebaseService? = nil) async throws -> [Affirmation] {
+        let service = firebaseService ?? FirebaseService()
+        let data = try await service.fetchAffirmations(categories: nil, limit: limit)
+        return data.compactMap { Affirmation.from(data: $0) }
     }
 }
