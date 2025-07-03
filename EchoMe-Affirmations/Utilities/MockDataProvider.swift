@@ -142,6 +142,72 @@ struct MockDataProvider {
         Array(mockAffirmations.shuffled().prefix(count))
     }
     
+    // MARK: - Continuous Play Affirmations
+    func getContinuousPlayAffirmations(preferences: ContinuousPlayPreferences) -> [Affirmation] {
+        var affirmations = mockAffirmations
+        
+        // Filter by focus areas if specified
+        if !preferences.focusAreas.isEmpty {
+            affirmations = affirmations.filter { affirmation in
+                affirmation.categories.contains { category in
+                    preferences.focusAreas.contains(category)
+                }
+            }
+        }
+        
+        // Filter by mood/tone if specified
+        if let mood = preferences.mood {
+            switch mood.lowercased() {
+            case "calm", "relaxed":
+                affirmations = affirmations.filter {
+                    ["gentle", "spiritual", "calm"].contains($0.tone)
+                }
+            case "energized", "motivated":
+                affirmations = affirmations.filter {
+                    ["motivational"].contains($0.tone)
+                }
+            case "focused":
+                affirmations = affirmations.filter { affirmation in
+                    affirmation.categories.contains("mindfulness") ||
+                    affirmation.categories.contains("productivity")
+                }
+            default:
+                break
+            }
+        }
+        
+        // Filter by energy level if specified
+        if let energyLevel = preferences.energyLevel {
+            switch energyLevel.lowercased() {
+            case "high":
+                affirmations = affirmations.filter {
+                    ["motivational"].contains($0.tone) ||
+                    $0.categories.contains("motivation") ||
+                    $0.categories.contains("success")
+                }
+            case "low":
+                affirmations = affirmations.filter {
+                    ["gentle", "spiritual"].contains($0.tone) ||
+                    $0.categories.contains("calm") ||
+                    $0.categories.contains("mindfulness")
+                }
+            case "medium":
+                // Return balanced mix
+                break
+            default:
+                break
+            }
+        }
+        
+        // If no affirmations match filters, return all affirmations
+        if affirmations.isEmpty {
+            affirmations = mockAffirmations
+        }
+        
+        // Return shuffled for variety
+        return affirmations.shuffled()
+    }
+    
     // Tuple version for backward compatibility
     func getDailyAffirmationTuples(count: Int = 5) -> [(id: String, text: String)] {
         getDailyAffirmations(count: count).map { (id: $0.id, text: $0.text) }

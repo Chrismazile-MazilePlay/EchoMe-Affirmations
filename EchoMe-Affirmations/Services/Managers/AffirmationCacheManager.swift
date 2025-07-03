@@ -265,23 +265,6 @@ private class AudioCacheManager {
     }
 }
 
-// MARK: - Supporting Types
-struct ContinuousPlayPreferences {
-    var mood: String?
-    var focusAreas: [String]
-    var energyLevel: String?
-    var skipQuestions: Bool
-    
-    static var `default`: ContinuousPlayPreferences {
-        ContinuousPlayPreferences(
-            mood: nil,
-            focusAreas: [],
-            energyLevel: nil,
-            skipQuestions: true
-        )
-    }
-}
-
 // MARK: - Preview Support
 extension AffirmationCacheManager {
     static var preview: AffirmationCacheManager {

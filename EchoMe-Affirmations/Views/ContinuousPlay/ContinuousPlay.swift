@@ -5,6 +5,13 @@
 //  Created by Christopher Mazile on 7/2/25.
 //
 
+//
+//  ContinuousPlayView.swift
+//  EchoMe-Affirmations
+//
+//  Created on July 02, 2025.
+//
+
 import SwiftUI
 import AVFoundation
 
@@ -37,9 +44,9 @@ struct ContinuousPlayView: View {
                 
                 if isLoading {
                     loadingView
-                } else if affirmations.isEmpty {
+                } else if affirmations.isEmpty && !showingSetup {
                     emptyStateView
-                } else {
+                } else if !affirmations.isEmpty {
                     continuousPlayContent
                 }
             }
@@ -47,12 +54,17 @@ struct ContinuousPlayView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") { dismiss() }
-                        .foregroundColor(.white)
+                    Button("Close") {
+                        stopPlayback()
+                        dismiss()
+                    }
+                    .foregroundColor(.white)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    playPauseButton
+                    if !affirmations.isEmpty {
+                        playPauseButton
+                    }
                 }
             }
             .sheet(isPresented: $showingSetup) {
