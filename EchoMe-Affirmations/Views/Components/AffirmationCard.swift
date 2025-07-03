@@ -139,8 +139,24 @@ struct AffirmationCard: View {
     }
     
     private func loadUserVoiceProfile() {
-        let voiceProfileName = authManager.userProfile?.preferences.voiceProfile ?? "Calm & Clear"
-        userVoiceProfile = VoiceProfile.allProfiles.first { $0.name == voiceProfileName }
+        // 1. First check UserDefaults
+        if let savedVoiceProfileName = UserDefaults.standard.string(forKey: "selectedVoiceProfile") {
+            if let profile = VoiceProfile.allProfiles.first(where: { $0.name == savedVoiceProfileName }) {
+                userVoiceProfile = profile
+                return
+            }
+        }
+        
+        // 2. Then check Firebase user preferences
+        if let voiceProfileName = authManager.userProfile?.preferences.voiceProfile {
+            if let profile = VoiceProfile.allProfiles.first(where: { $0.name == voiceProfileName }) {
+                userVoiceProfile = profile
+                return
+            }
+        }
+        
+        // 3. Fall back to default
+        userVoiceProfile = VoiceProfile.defaultVoiceProfile
     }
     
     private func toggleFavorite() {
@@ -181,4 +197,3 @@ struct ShareHelper {
     .padding()
     .environment(\.services, ServicesContainer.preview)
 }
-

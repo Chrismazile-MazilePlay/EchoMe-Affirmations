@@ -2,19 +2,19 @@
 //  ContentView.swift
 //  EchoMe-Affirmations
 //
-//  Created by Christopher Mazile on 7/2/25.
+//  Created by Christopher Mazile on 6/30/25.
 //
-
+/*
 import SwiftUI
 
-struct ContentView: View {
+struct ContentView2: View {
     @Environment(\.services) private var services
     
     @State private var affirmations: [Affirmation] = []
     @State private var currentIndex = 0
     @State private var userCategories: [String] = []
     @State private var isOffline = false
-    @State private var hasInitiallyLoaded = false
+    @State private var showingContinuousPlay = false
     
     var body: some View {
         NavigationStack {
@@ -39,25 +39,18 @@ struct ContentView: View {
                     Spacer()
                 }
             }
-            .ignoresSafeArea(.all)
+            .ignoresSafeArea()
             .preferredColorScheme(.dark) // Force white status bar icons
-            .onAppear {
-                // Only setup if we haven't loaded before
-                if !hasInitiallyLoaded {
-                    setupView()
-                    hasInitiallyLoaded = true
-                } else {
-                    // Just restart favorites listening when returning
-                    services.favoritesManager.startListening()
-                }
-            }
-            .onDisappear {
-                services.favoritesManager.stopListening()
-            }
+            .onAppear { setupView() }
+            .onDisappear { services.favoritesManager.stopListening() }
             .onChange(of: currentIndex) { _, newIndex in
                 checkForMoreAffirmations(at: newIndex)
             }
+            .fullScreenCover(isPresented: $showingContinuousPlay) {
+                ContinuousPlayView()
+            }
         }
+        .environment(\.showingContinuousPlay, $showingContinuousPlay)
     }
     
     // MARK: - Views
@@ -69,10 +62,11 @@ struct ContentView: View {
                     affirmation: affirmation,
                     isFavorite: services.favoritesManager.isFavorite(affirmation.id),
                     onFavoriteToggle: { toggleFavorite(affirmation) },
+                    onSpeak: { speakAffirmation(affirmation) },
+                    onShare: { shareAffirmation(affirmation) },
                     isOffline: isOffline && index == affirmations.count - 1
                 )
                 .tag(index)
-                .environment(\.services, services) // Pass services to child view
             }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
@@ -117,14 +111,6 @@ struct ContentView: View {
                 Text("Try updating your preferences")
                     .font(.caption)
                     .foregroundColor(.gray)
-                
-                Button("Retry") {
-                    Task {
-                        await loadAffirmations(forceRefresh: true)
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.purple)
             }
         }
         .ignoresSafeArea()
@@ -134,17 +120,11 @@ struct ContentView: View {
     
     private func setupView() {
         loadUserPreferences()
+        loadCachedAffirmations()
+        services.favoritesManager.startListening()
         
-        // Try to load from cache first
-        if loadCachedAffirmations() {
-            // We have cached data, use it
-            services.favoritesManager.startListening()
-        } else {
-            // No cache, load from Firebase
-            services.favoritesManager.startListening()
-            Task {
-                await loadAffirmations()
-            }
+        Task {
+            await loadAffirmations()
         }
     }
     
@@ -154,19 +134,17 @@ struct ContentView: View {
         }
     }
     
-    private func loadCachedAffirmations() -> Bool {
-        // Check if we have cached affirmations
+    private func loadCachedAffirmations() {
+        // Show cached affirmations immediately
         if !services.affirmationCacheManager.currentBatch.isEmpty {
             affirmations = services.affirmationCacheManager.currentBatch
             sendAffirmationsToWatch()
-            return true
         }
-        return false
     }
     
     // MARK: - Data Loading
     
-    private func loadAffirmations(forceRefresh: Bool = false) async {
+    private func loadAffirmations() async {
         if MockDataProvider.isPreview {
             // Use mock data in preview
             await MainActor.run {
@@ -178,7 +156,7 @@ struct ContentView: View {
         
         await services.affirmationCacheManager.loadBatch(
             categories: userCategories,
-            forceRefresh: forceRefresh
+            forceRefresh: false
         )
         
         await MainActor.run {
@@ -221,23 +199,44 @@ struct ContentView: View {
         )
     }
     
+    private func speakAffirmation(_ affirmation: Affirmation) {
+        services.speechManager.speak(affirmation.text)
+        print("🔊 Debug ContentView - Saved voice: \(UserDefaults.standard.string(forKey: "selectedVoiceProfile") ?? "nil")")
+        print("🔊 Debug ContentView - User profile voice: \(services.authManager.userProfile?.preferences.voiceProfile ?? "nil")")
+    }
+    
+    private func shareAffirmation(_ affirmation: Affirmation) {
+        ShareHelper.share(text: affirmation.text)
+    }
+    
     private func sendAffirmationsToWatch() {
         print("📱 Sending \(affirmations.count) affirmations to watch")
         services.watchConnectivityManager.sendAffirmationsToWatch(affirmations)
     }
 }
 
+// MARK: - Environment Key for Continuous Play
+private struct ShowingContinuousPlayKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+extension EnvironmentValues {
+    var showingContinuousPlay: Binding<Bool> {
+        get { self[ShowingContinuousPlayKey.self] }
+        set { self[ShowingContinuousPlayKey.self] = newValue }
+    }
+}
+
 // MARK: - Full Screen Affirmation View
 struct FullScreenAffirmationView: View {
-    @Environment(\.services) private var services
-    
     let affirmation: Affirmation
     let isFavorite: Bool
     let onFavoriteToggle: () -> Void
+    let onSpeak: () -> Void
+    let onShare: () -> Void
     let isOffline: Bool
     
     @State private var isAnimatingHeart = false
-    @State private var userVoiceProfile: VoiceProfile?
     
     var body: some View {
         ZStack {
@@ -302,7 +301,7 @@ struct FullScreenAffirmationView: View {
                             icon: "speaker.wave.2.fill",
                             color: .white
                         ) {
-                            speakAffirmation()
+                            onSpeak()
                         }
                         
                         // Share button
@@ -310,16 +309,13 @@ struct FullScreenAffirmationView: View {
                             icon: "square.and.arrow.up",
                             color: .white
                         ) {
-                            shareAffirmation()
+                            onShare()
                         }
                     }
                     .padding(.trailing, 20)
                     .padding(.bottom, 100)
                 }
             }
-        }
-        .onAppear {
-            loadUserVoiceProfile()
         }
     }
     
@@ -341,38 +337,6 @@ struct FullScreenAffirmationView: View {
             Color(hue: hue, saturation: 0.7, brightness: 0.8),
             Color(hue: (hue + 0.2).truncatingRemainder(dividingBy: 1.0), saturation: 0.6, brightness: 0.6)
         ]
-    }
-    
-    // MARK: - Actions
-    
-    private func loadUserVoiceProfile() {
-        // 1. First check UserDefaults
-        if let savedVoiceProfileName = UserDefaults.standard.string(forKey: "selectedVoiceProfile") {
-            if let profile = VoiceProfile.allProfiles.first(where: { $0.name == savedVoiceProfileName }) {
-                userVoiceProfile = profile
-                return
-            }
-        }
-        
-        // 2. Then check Firebase user preferences
-        if let voiceProfileName = services.authManager.userProfile?.preferences.voiceProfile {
-            if let profile = VoiceProfile.allProfiles.first(where: { $0.name == voiceProfileName }) {
-                userVoiceProfile = profile
-                return
-            }
-        }
-        
-        // 3. Fall back to default
-        userVoiceProfile = VoiceProfile.defaultVoiceProfile
-    }
-    
-    private func speakAffirmation() {
-        let voiceProfile = userVoiceProfile ?? VoiceProfile.defaultVoiceProfile
-        services.speechManager.speak(affirmation.text, voice: voiceProfile)
-    }
-    
-    private func shareAffirmation() {
-        ShareHelper.share(text: affirmation.text)
     }
 }
 
@@ -399,3 +363,4 @@ struct ActionButton: View {
     ContentView()
         .environment(\.services, ServicesContainer.previewWithMockData)
 }
+*/

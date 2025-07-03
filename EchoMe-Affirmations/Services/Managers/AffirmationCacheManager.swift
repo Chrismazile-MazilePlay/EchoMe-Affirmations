@@ -23,6 +23,9 @@ final class AffirmationCacheManager {
     var currentBatch: [Affirmation] = []
     var lastBackgroundTime: Date?
     
+    // Add this to prevent reloading
+    private var hasInitialLoad = false
+    
     // Constants
     private let batchSize = 50
     private let maxCachedAudio = 50
@@ -51,15 +54,22 @@ final class AffirmationCacheManager {
     
     /// Load affirmations for main feed
     func loadBatch(categories: [String], forceRefresh: Bool = false) async {
+        // Don't reload if we already have data and not forcing refresh
+        if hasInitialLoad && !currentBatch.isEmpty && !forceRefresh {
+            return
+        }
+        
         // Use cache first if available and not forcing refresh
-        if !cachedAffirmations.isEmpty && !forceRefresh {
+        if !cachedAffirmations.isEmpty && !forceRefresh && !hasInitialLoad {
             currentBatch = Array(cachedAffirmations.prefix(batchSize))
+            hasInitialLoad = true
             return
         }
         
         // Load new batch if needed
-        if shouldRefreshBatch() || forceRefresh {
+        if shouldRefreshBatch() || forceRefresh || !hasInitialLoad {
             await fetchNewBatch(categories: categories)
+            hasInitialLoad = true
         }
     }
     
@@ -74,12 +84,34 @@ final class AffirmationCacheManager {
     
     /// Load affirmations for continuous play
     func loadContinuousPlayBatch(preferences: ContinuousPlayPreferences) async -> [Affirmation] {
-        // For now, return shuffled batch based on preferences
-        // This will be enhanced with psychological algorithm later
         if MockDataProvider.isPreview {
-            return MockDataProvider.shared.getDailyAffirmations().shuffled()
+            // For mock data, use partial matching
+            var filteredAffirmations = MockDataProvider.shared.mockAffirmations
+            
+            if !preferences.focusAreas.isEmpty {
+                filteredAffirmations = filteredAffirmations.filter { affirmation in
+                    // Check if any of the affirmation's categories partially match any focus area
+                    affirmation.categories.contains { category in
+                        preferences.focusAreas.contains { focusArea in
+                            // Case-insensitive partial matching
+                            category.lowercased().contains(focusArea.lowercased()) ||
+                            focusArea.lowercased().contains(category.lowercased()) ||
+                            // Also check for common variations
+                            (focusArea.lowercased() == "relationships" && category.lowercased() == "love") ||
+                            (focusArea.lowercased() == "success" && category.lowercased() == "motivation") ||
+                            (focusArea.lowercased() == "abundance" && category.lowercased() == "gratitude") ||
+                            (focusArea.lowercased() == "peace" && category.lowercased() == "calm") ||
+                            (focusArea.lowercased() == "health" && category.lowercased() == "self-worth")
+                        }
+                    }
+                }
+            }
+            
+            // If no matches found, return all affirmations rather than empty
+            return filteredAffirmations.isEmpty ? MockDataProvider.shared.mockAffirmations.shuffled() : filteredAffirmations.shuffled()
         }
         
+        // For production, fetch with categories
         let categories = preferences.focusAreas
         await fetchNewBatch(categories: categories)
         return currentBatch.shuffled()
@@ -155,6 +187,10 @@ final class AffirmationCacheManager {
             
         } catch {
             print("❌ Failed to fetch affirmations: \(error)")
+            // If fetch fails and we're in preview, load mock data
+            if MockDataProvider.isPreview {
+                loadMockData()
+            }
         }
     }
     
@@ -204,7 +240,7 @@ final class AffirmationCacheManager {
     }
     
     private func loadMockData() {
-        let mockAffirmations = MockDataProvider.shared.getDailyAffirmations()
+        let mockAffirmations = MockDataProvider.shared.getDailyAffirmations(count: batchSize)
         cachedAffirmations = mockAffirmations
         currentBatch = Array(mockAffirmations.prefix(batchSize))
     }

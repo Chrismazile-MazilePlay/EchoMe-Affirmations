@@ -206,6 +206,8 @@ private struct FavoriteCard: View {
     
     private func speakAffirmation() {
         services.speechManager.speak(affirmation.text)
+        print("🔊 Debug FavoritsView - Saved voice: \(UserDefaults.standard.string(forKey: "selectedVoiceProfile") ?? "nil")")
+        print("🔊 Debug FavoritsView - User profile voice: \(services.authManager.userProfile?.preferences.voiceProfile ?? "nil")")
     }
 }
 

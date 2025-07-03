@@ -9,7 +9,6 @@ import SwiftUI
 
 struct FloatingMenuButton: View {
     @Environment(\.services) private var services
-    @Environment(\.showingContinuousPlay) private var showingContinuousPlay
     @State private var isExpanded = false
     
     var body: some View {
@@ -50,8 +49,9 @@ struct FloatingMenuButton: View {
             }
         }) {
             HStack(spacing: 12) {
-                Image(systemName: "house.fill")
-                Text("Home")
+                Image(systemName: "line.3.horizontal")
+                    .font(.title3)
+                Text("Menu")
                 Image(systemName: "chevron.down")
                     .font(.caption)
             }
@@ -74,13 +74,7 @@ struct FloatingMenuButton: View {
     // MARK: - Expanded State
     private var expandedMenu: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Header with user info
-            menuHeader
-            
-            Divider()
-                .background(Color.white.opacity(0.2))
-            
-            // Menu items (removed Home)
+            // Menu items only - no header
             VStack(alignment: .leading, spacing: 0) {
                 NavigationLink(destination: FavoritesView()) {
                     menuItem(icon: "heart.fill", title: "Favorites")
@@ -100,12 +94,14 @@ struct FloatingMenuButton: View {
                     }
                 })
                 
-                Button(action: {
-                    isExpanded = false
-                    showingContinuousPlay.wrappedValue = true
-                }) {
+                NavigationLink(destination: ContinuousPlayView()) {
                     menuItem(icon: "infinity", title: "Continuous Play")
                 }
+                .simultaneousGesture(TapGesture().onEnded { _ in
+                    withAnimation {
+                        isExpanded = false
+                    }
+                })
                 
                 NavigationLink(destination: ProfileView()) {
                     menuItem(icon: "person.circle.fill", title: "Profile")
@@ -126,8 +122,29 @@ struct FloatingMenuButton: View {
                 }) {
                     menuItem(icon: "arrow.right.square.fill", title: "Sign Out")
                 }
+                
+                // Close button at the bottom
+                Button(action: {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        isExpanded = false
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "xmark")
+                            .font(.title3)
+                            .frame(width: 24)
+                        
+                        Text("Close")
+                            .font(.body)
+                        
+                        Spacer()
+                    }
+                    .foregroundColor(.white.opacity(0.7))
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 14)
+                }
             }
-            .padding(.bottom, 8)
+            .padding(.vertical, 8)
         }
         .frame(width: 280)
         .background(
@@ -139,49 +156,6 @@ struct FloatingMenuButton: View {
                 )
         )
         .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
-    }
-    
-    private var menuHeader: some View {
-        HStack(spacing: 12) {
-            // User avatar
-            Circle()
-                .fill(Color.blue.opacity(0.3))
-                .frame(width: 50, height: 50)
-                .overlay(
-                    Text(getUserInitials())
-                        .font(.headline)
-                        .foregroundColor(.white)
-                )
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(getUserName())
-                    .font(.headline)
-                    .foregroundColor(.white)
-                
-                HStack(spacing: 4) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.caption2)
-                    Text("Settings")
-                        .font(.caption)
-                }
-                .foregroundColor(.white.opacity(0.7))
-            }
-            
-            Spacer()
-            
-            Button(action: {}) {
-                Text("Edit")
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(Color.white.opacity(0.2))
-                    )
-            }
-        }
-        .padding(16)
     }
     
     private func menuItem(
@@ -201,21 +175,6 @@ struct FloatingMenuButton: View {
         .foregroundColor(.white)
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
-    }
-    
-    private func getUserInitials() -> String {
-        if let displayName = services.authManager.userProfile?.displayName {
-            return displayName
-                .split(separator: " ")
-                .compactMap { $0.first.map(String.init) }
-                .joined()
-                .uppercased()
-        }
-        return "CM"
-    }
-    
-    private func getUserName() -> String {
-        services.authManager.userProfile?.displayName ?? "User"
     }
 }
 

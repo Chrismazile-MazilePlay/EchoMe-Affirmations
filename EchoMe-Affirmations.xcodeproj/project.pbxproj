@@ -21,6 +21,7 @@
 		2A0BD90C2E161FF20029B6DB /* FavoritesManager+Firebase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD90B2E161FF00029B6DB /* FavoritesManager+Firebase.swift */; };
 		2A0BD90E2E1621970029B6DB /* ContinuousPlayPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD90D2E1621960029B6DB /* ContinuousPlayPreferences.swift */; };
 		2A0BD90F2E1621970029B6DB /* ContinuousPlayPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD90D2E1621960029B6DB /* ContinuousPlayPreferences.swift */; };
+		2A0BD9112E16300E0029B6DB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD9102E1630080029B6DB /* ContentView.swift */; };
 		2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */; };
 		2A903DD32E147133003FC209 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCE2E147133003FC209 /* ContentView.swift */; };
 		2A903DD42E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */; };
@@ -30,7 +31,7 @@
 		2AA8CF272E13718B003B2C59 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA8CF262E13718B003B2C59 /* FirebaseAuth */; };
 		2AA8CF292E13718B003B2C59 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2AA8CF282E13718B003B2C59 /* FirebaseFirestore */; };
 		2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF412E1427F2003B2C59 /* AuthenticationView.swift */; };
-		2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF422E1427F2003B2C59 /* ContentView.swift */; };
+		2AA8CF4E2E1427F2003B2C59 /* ContentView2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF422E1427F2003B2C59 /* ContentView2.swift */; };
 		2AA8CF4F2E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */; };
 		2AA8CF502E1427F2003B2C59 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF452E1427F2003B2C59 /* FavoritesView.swift */; };
 		2AA8CF522E1427F2003B2C59 /* MockDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA8CF482E1427F2003B2C59 /* MockDataProvider.swift */; };
@@ -124,6 +125,7 @@
 		2A0BD9082E160C0C0029B6DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2A0BD90B2E161FF00029B6DB /* FavoritesManager+Firebase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FavoritesManager+Firebase.swift"; sourceTree = "<group>"; };
 		2A0BD90D2E1621960029B6DB /* ContinuousPlayPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousPlayPreferences.swift; sourceTree = "<group>"; };
+		2A0BD9102E1630080029B6DB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationWatchView.swift; sourceTree = "<group>"; };
 		2A903DCD2E147133003FC209 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A903DCE2E147133003FC209 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -135,7 +137,7 @@
 		2AA8CF102E136F5A003B2C59 /* EchoMe-AffirmationsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EchoMe-AffirmationsUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AA8CF402E1427F2003B2C59 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2AA8CF412E1427F2003B2C59 /* AuthenticationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationView.swift; sourceTree = "<group>"; };
-		2AA8CF422E1427F2003B2C59 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2AA8CF422E1427F2003B2C59 /* ContentView2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView2.swift; sourceTree = "<group>"; };
 		2AA8CF432E1427F2003B2C59 /* EchoMe_Affirmations.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EchoMe_Affirmations.entitlements; sourceTree = "<group>"; };
 		2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoMe_AffirmationsApp.swift; sourceTree = "<group>"; };
 		2AA8CF452E1427F2003B2C59 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
@@ -413,7 +415,8 @@
 				2A0BD8F02E14DCC00029B6DB /* NavigationState.swift */,
 				2A0BD8F22E14DFA60029B6DB /* DebugNavigationView.swift */,
 				2A0BD8EE2E14DA290029B6DB /* RootView.swift */,
-				2AA8CF422E1427F2003B2C59 /* ContentView.swift */,
+				2A0BD9102E1630080029B6DB /* ContentView.swift */,
+				2AA8CF422E1427F2003B2C59 /* ContentView2.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -753,7 +756,7 @@
 				2AD38D9F2E14A08900A284A2 /* WatchConnectivityProtocol.swift in Sources */,
 				2AA8CF752E142A99003B2C59 /* FirebaseService.swift in Sources */,
 				2AA8CF732E142A83003B2C59 /* AuthManager.swift in Sources */,
-				2AA8CF4E2E1427F2003B2C59 /* ContentView.swift in Sources */,
+				2AA8CF4E2E1427F2003B2C59 /* ContentView2.swift in Sources */,
 				2AA8CF4F2E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift in Sources */,
 				2AA8CF502E1427F2003B2C59 /* FavoritesView.swift in Sources */,
 				2AA8CF692E142953003B2C59 /* VoiceProfile.swift in Sources */,
@@ -764,6 +767,7 @@
 				2AA8CFAF2E1448AB003B2C59 /* WatchConnectivityManager.swift in Sources */,
 				2AD38DA22E14AFE900A284A2 /* ProfileView.swift in Sources */,
 				2A903DDB2E1473C9003FC209 /* FavoritesManager.swift in Sources */,
+				2A0BD9112E16300E0029B6DB /* ContentView.swift in Sources */,
 				2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */,
 				2AA8CF542E1427F2003B2C59 /* SpeechManager.swift in Sources */,
 				2A0BD90F2E1621970029B6DB /* ContinuousPlayPreferences.swift in Sources */,

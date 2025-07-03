@@ -52,15 +52,7 @@ struct ContinuousPlayView: View {
             }
             .navigationTitle("Continuous Play")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        stopPlayback()
-                        dismiss()
-                    }
-                    .foregroundColor(.white)
-                }
-                
+            .toolbar {                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !affirmations.isEmpty {
                         playPauseButton
