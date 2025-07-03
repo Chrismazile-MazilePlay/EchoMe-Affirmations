@@ -15,6 +15,9 @@
 		2A0BD8FA2E1503CF0029B6DB /* AffirmationCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8F92E1503CD0029B6DB /* AffirmationCache.swift */; };
 		2A0BD8FC2E1503FF0029B6DB /* AffirmationCacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8FB2E1503FD0029B6DB /* AffirmationCacheManager.swift */; };
 		2A0BD8FE2E1506E20029B6DB /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8FD2E1506E10029B6DB /* EmptyStateView.swift */; };
+		2A0BD9002E16089B0029B6DB /* FloatingMenuButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD8FF2E1608980029B6DB /* FloatingMenuButton.swift */; };
+		2A0BD9032E160A950029B6DB /* ContinuousPlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD9022E160A940029B6DB /* ContinuousPlay.swift */; };
+		2A0BD9052E160AAF0029B6DB /* ContinuousPlaySetupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A0BD9042E160AAE0029B6DB /* ContinuousPlaySetupSheet.swift */; };
 		2A903DD22E147133003FC209 /* AffirmationWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */; };
 		2A903DD32E147133003FC209 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCE2E147133003FC209 /* ContentView.swift */; };
 		2A903DD42E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A903DCF2E147133003FC209 /* EchoMe_Affirmations_Watch_AppApp.swift */; };
@@ -112,6 +115,10 @@
 		2A0BD8F92E1503CD0029B6DB /* AffirmationCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCache.swift; sourceTree = "<group>"; };
 		2A0BD8FB2E1503FD0029B6DB /* AffirmationCacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCacheManager.swift; sourceTree = "<group>"; };
 		2A0BD8FD2E1506E10029B6DB /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		2A0BD8FF2E1608980029B6DB /* FloatingMenuButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingMenuButton.swift; sourceTree = "<group>"; };
+		2A0BD9022E160A940029B6DB /* ContinuousPlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousPlay.swift; sourceTree = "<group>"; };
+		2A0BD9042E160AAE0029B6DB /* ContinuousPlaySetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousPlaySetupSheet.swift; sourceTree = "<group>"; };
+		2A0BD9082E160C0C0029B6DB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2A903DCC2E147133003FC209 /* AffirmationWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationWatchView.swift; sourceTree = "<group>"; };
 		2A903DCD2E147133003FC209 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A903DCE2E147133003FC209 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -219,6 +226,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2A0BD9012E160A8A0029B6DB /* ContinuousPlay */ = {
+			isa = PBXGroup;
+			children = (
+				2A0BD9022E160A940029B6DB /* ContinuousPlay.swift */,
+				2A0BD9042E160AAE0029B6DB /* ContinuousPlaySetupSheet.swift */,
+			);
+			path = ContinuousPlay;
+			sourceTree = "<group>";
+		};
 		2A903DCB2E14710F003FC209 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -295,6 +311,7 @@
 		2AA8CF4C2E1427F2003B2C59 /* EchoMe-Affirmations */ = {
 			isa = PBXGroup;
 			children = (
+				2A0BD9082E160C0C0029B6DB /* Info.plist */,
 				2AA8CF432E1427F2003B2C59 /* EchoMe_Affirmations.entitlements */,
 				2AA8CF442E1427F2003B2C59 /* EchoMe_AffirmationsApp.swift */,
 				2A0BD8F72E14FFBE0029B6DB /* AppDelegate.swift */,
@@ -347,6 +364,7 @@
 		2AA8CF622E142915003B2C59 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				2A0BD9012E160A8A0029B6DB /* ContinuousPlay */,
 				2AA8CF6A2E142978003B2C59 /* Authentication */,
 				2AA8CF6B2E142988003B2C59 /* Onboarding */,
 				2AA8CF6C2E14299B003B2C59 /* Main */,
@@ -414,6 +432,7 @@
 		2AA8CF6F2E142A19003B2C59 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				2A0BD8FF2E1608980029B6DB /* FloatingMenuButton.swift */,
 				2AA8CF702E142A49003B2C59 /* AffirmationCard.swift */,
 				2A0BD8FD2E1506E10029B6DB /* EmptyStateView.swift */,
 			);
@@ -714,7 +733,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A0BD9002E16089B0029B6DB /* FloatingMenuButton.swift in Sources */,
 				2A0BD8FC2E1503FF0029B6DB /* AffirmationCacheManager.swift in Sources */,
+				2A0BD9052E160AAF0029B6DB /* ContinuousPlaySetupSheet.swift in Sources */,
 				2AA8CF4D2E1427F2003B2C59 /* AuthenticationView.swift in Sources */,
 				2A0BD8F12E14DCC20029B6DB /* NavigationState.swift in Sources */,
 				2A0BD8EF2E14DA2A0029B6DB /* RootView.swift in Sources */,
@@ -737,6 +758,7 @@
 				2A903DDB2E1473C9003FC209 /* FavoritesManager.swift in Sources */,
 				2AA8CF672E142945003B2C59 /* Affirmation.swift in Sources */,
 				2AA8CF542E1427F2003B2C59 /* SpeechManager.swift in Sources */,
+				2A0BD9032E160A950029B6DB /* ContinuousPlay.swift in Sources */,
 				2A0BD8ED2E14BB9B0029B6DB /* ServicesContainer.swift in Sources */,
 				2AA8CF712E142A51003B2C59 /* AffirmationCard.swift in Sources */,
 				2AA8CF652E142937003B2C59 /* User.swift in Sources */,
@@ -947,6 +969,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "EchoMe-Affirmations/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -986,6 +1009,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "EchoMe-Affirmations/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

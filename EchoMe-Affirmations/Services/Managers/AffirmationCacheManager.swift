@@ -4,7 +4,7 @@
 //
 //  Created by Christopher Mazile on 7/2/25.
 //
-
+ 
 import SwiftUI
 import SwiftData
 import Observation
@@ -15,15 +15,19 @@ final class AffirmationCacheManager {
     // MARK: - Properties
     private let modelContainer: ModelContainer?
     private let firebaseService: FirebaseService
+    private let audioCache = AudioCacheManager()
     
     // Observable state
     var cachedAffirmations: [Affirmation] = []
     var isLoading = false
-    var lastRefresh: Date?
+    var currentBatch: [Affirmation] = []
+    var lastBackgroundTime: Date?
     
-    // MARK: - Constants
-    private let cacheExpirationHours: Double = 24
-    private let maxCachedItems = 50
+    // Constants
+    private let batchSize = 50
+    private let maxCachedAudio = 50
+    private let backgroundRefreshHours: Double = 4
+    private let reloadThreshold = 10
     
     // MARK: - Initialization
     init(firebaseService: FirebaseService, isPreview: Bool = false) {
@@ -31,7 +35,7 @@ final class AffirmationCacheManager {
         
         if !isPreview {
             do {
-                self.modelContainer = try ModelContainer(for: CachedAffirmation.self)
+                self.modelContainer = try ModelContainer(for: AffirmationCache.self, CachedAudioFile.self)
                 loadCachedAffirmations()
             } catch {
                 print("❌ Failed to create ModelContainer: \(error)")
@@ -45,18 +49,50 @@ final class AffirmationCacheManager {
     
     // MARK: - Public Methods
     
-    /// Load affirmations with cache-first strategy
-    func loadAffirmations(categories: [String], forceRefresh: Bool = false) async {
-        // Always show cached data immediately
+    /// Load affirmations for main feed
+    func loadBatch(categories: [String], forceRefresh: Bool = false) async {
+        // Use cache first if available and not forcing refresh
         if !cachedAffirmations.isEmpty && !forceRefresh {
-            print("📱 Using cached affirmations: \(cachedAffirmations.count)")
+            currentBatch = Array(cachedAffirmations.prefix(batchSize))
             return
         }
         
-        // Refresh if cache is stale or forced
-        if shouldRefreshCache() || forceRefresh {
-            await refreshFromFirebase(categories: categories)
+        // Load new batch if needed
+        if shouldRefreshBatch() || forceRefresh {
+            await fetchNewBatch(categories: categories)
         }
+    }
+    
+    /// Check if more affirmations needed
+    func checkAndLoadMore(currentIndex: Int, categories: [String]) async {
+        let remainingCount = currentBatch.count - currentIndex
+        
+        if remainingCount <= reloadThreshold {
+            await fetchNextBatch(categories: categories)
+        }
+    }
+    
+    /// Load affirmations for continuous play
+    func loadContinuousPlayBatch(preferences: ContinuousPlayPreferences) async -> [Affirmation] {
+        // For now, return shuffled batch based on preferences
+        // This will be enhanced with psychological algorithm later
+        if MockDataProvider.isPreview {
+            return MockDataProvider.shared.getDailyAffirmations().shuffled()
+        }
+        
+        let categories = preferences.focusAreas
+        await fetchNewBatch(categories: categories)
+        return currentBatch.shuffled()
+    }
+    
+    /// Cache audio file
+    func cacheAudioFile(for affirmationId: String, audioData: Data) async {
+        await audioCache.store(audioData: audioData, for: affirmationId)
+    }
+    
+    /// Get cached audio
+    func getCachedAudio(for affirmationId: String) -> URL? {
+        return audioCache.getAudioURL(for: affirmationId)
     }
     
     // MARK: - Private Methods
@@ -65,14 +101,14 @@ final class AffirmationCacheManager {
         guard let modelContainer = modelContainer else { return }
         
         do {
-            let descriptor = FetchDescriptor<CachedAffirmation>(
+            let descriptor = FetchDescriptor<AffirmationCache>(
                 sortBy: [SortDescriptor(\.order)]
             )
             let context = ModelContext(modelContainer)
             let cached = try context.fetch(descriptor)
             
             self.cachedAffirmations = cached.map { $0.affirmation }
-            self.lastRefresh = cached.first?.cachedAt
+            self.currentBatch = Array(cachedAffirmations.prefix(batchSize))
             
             print("📱 Loaded \(cached.count) cached affirmations")
         } catch {
@@ -80,20 +116,23 @@ final class AffirmationCacheManager {
         }
     }
     
-    private func shouldRefreshCache() -> Bool {
-        guard let lastRefresh = lastRefresh else { return true }
-        let hoursSinceRefresh = Date().timeIntervalSince(lastRefresh) / 3600
-        return hoursSinceRefresh > cacheExpirationHours
+    private func shouldRefreshBatch() -> Bool {
+        // Check if we need background refresh
+        if let lastBackground = lastBackgroundTime {
+            let hoursSince = Date().timeIntervalSince(lastBackground) / 3600
+            return hoursSince >= backgroundRefreshHours
+        }
+        return true
     }
     
-    private func refreshFromFirebase(categories: [String]) async {
+    private func fetchNewBatch(categories: [String]) async {
         isLoading = true
         defer { isLoading = false }
         
         do {
             let fetchedData = try await firebaseService.fetchAffirmations(
                 categories: categories.isEmpty ? nil : categories,
-                limit: maxCachedItems
+                limit: batchSize * 2 // Fetch extra for smooth scrolling
             )
             
             let affirmations = fetchedData.compactMap { data -> Affirmation? in
@@ -109,16 +148,26 @@ final class AffirmationCacheManager {
                 )
             }
             
-            // Update cache
             await updateCache(with: affirmations)
-            
-            // Update observable state
             self.cachedAffirmations = affirmations
-            self.lastRefresh = Date()
+            self.currentBatch = Array(affirmations.prefix(batchSize))
+            self.lastBackgroundTime = Date()
             
-            print("📱 Refreshed with \(affirmations.count) affirmations from Firebase")
         } catch {
-            print("❌ Failed to refresh from Firebase: \(error)")
+            print("❌ Failed to fetch affirmations: \(error)")
+        }
+    }
+    
+    private func fetchNextBatch(categories: [String]) async {
+        // For infinite scroll, we'll append to current batch
+        // In production, this would fetch next page from Firebase
+        if currentBatch.count < cachedAffirmations.count {
+            let startIndex = currentBatch.count
+            let endIndex = min(startIndex + batchSize, cachedAffirmations.count)
+            currentBatch.append(contentsOf: cachedAffirmations[startIndex..<endIndex])
+        } else {
+            // Loop back to beginning
+            currentBatch.append(contentsOf: Array(cachedAffirmations.prefix(batchSize)))
         }
     }
     
@@ -129,14 +178,14 @@ final class AffirmationCacheManager {
         
         // Clear old cache
         do {
-            try context.delete(model: CachedAffirmation.self)
+            try context.delete(model: AffirmationCache.self)
         } catch {
             print("❌ Failed to clear cache: \(error)")
         }
         
         // Add new items
         for (index, affirmation) in affirmations.enumerated() {
-            let cached = CachedAffirmation(
+            let cached = AffirmationCache(
                 id: affirmation.id,
                 text: affirmation.text,
                 categories: affirmation.categories,
@@ -155,7 +204,81 @@ final class AffirmationCacheManager {
     }
     
     private func loadMockData() {
-        cachedAffirmations = MockDataProvider.shared.mockAffirmations
+        let mockAffirmations = MockDataProvider.shared.getDailyAffirmations()
+        cachedAffirmations = mockAffirmations
+        currentBatch = Array(mockAffirmations.prefix(batchSize))
+    }
+}
+
+// MARK: - Audio Cache Manager
+private class AudioCacheManager {
+    private let cacheDirectory: URL
+    private let maxCacheSize = 50
+    
+    init() {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        cacheDirectory = documentsPath.appendingPathComponent("AudioCache")
+        
+        try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+    }
+    
+    func store(audioData: Data, for affirmationId: String) async {
+        let fileURL = cacheDirectory.appendingPathComponent("\(affirmationId).m4a")
+        
+        do {
+            try audioData.write(to: fileURL)
+            await cleanOldFiles()
+        } catch {
+            print("❌ Failed to cache audio: \(error)")
+        }
+    }
+    
+    func getAudioURL(for affirmationId: String) -> URL? {
+        let fileURL = cacheDirectory.appendingPathComponent("\(affirmationId).m4a")
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
+    }
+    
+    private func cleanOldFiles() async {
+        do {
+            let files = try FileManager.default.contentsOfDirectory(
+                at: cacheDirectory,
+                includingPropertiesForKeys: [.creationDateKey],
+                options: .skipsHiddenFiles
+            )
+            
+            if files.count > maxCacheSize {
+                let sortedFiles = try files.sorted { url1, url2 in
+                    let date1 = try url1.resourceValues(forKeys: [.creationDateKey]).creationDate ?? Date.distantPast
+                    let date2 = try url2.resourceValues(forKeys: [.creationDateKey]).creationDate ?? Date.distantPast
+                    return date1 < date2
+                }
+                
+                // Remove oldest files
+                let filesToRemove = sortedFiles.prefix(files.count - maxCacheSize)
+                for file in filesToRemove {
+                    try FileManager.default.removeItem(at: file)
+                }
+            }
+        } catch {
+            print("❌ Failed to clean audio cache: \(error)")
+        }
+    }
+}
+
+// MARK: - Supporting Types
+struct ContinuousPlayPreferences {
+    var mood: String?
+    var focusAreas: [String]
+    var energyLevel: String?
+    var skipQuestions: Bool
+    
+    static var `default`: ContinuousPlayPreferences {
+        ContinuousPlayPreferences(
+            mood: nil,
+            focusAreas: [],
+            energyLevel: nil,
+            skipQuestions: true
+        )
     }
 }
 

@@ -15,7 +15,7 @@ final class ServicesContainer: ObservableObject {
     let favoritesManager: FavoritesManager
     let watchConnectivityManager: WatchConnectivityManager
     let speechManager: SpeechManager
-    let affirmationCache: AffirmationCacheManager 
+    let affirmationCacheManager: AffirmationCacheManager
     
     init(
         firebaseService: FirebaseService? = nil,
@@ -24,7 +24,7 @@ final class ServicesContainer: ObservableObject {
         favoritesManager: FavoritesManager? = nil,
         watchConnectivityManager: WatchConnectivityManager? = nil,
         speechManager: SpeechManager? = nil,
-        affirmationCache: AffirmationCacheManager? = nil
+        affirmationCacheManager: AffirmationCacheManager? = nil
     ) {
         // Use singleton for Firebase
         self.firebaseService = firebaseService ?? FirebaseService.shared
@@ -32,10 +32,13 @@ final class ServicesContainer: ObservableObject {
         // Create services with shared Firebase service
         self.navigationState = navigationState ?? NavigationState()
         self.authManager = authManager ?? AuthenticationManager(firebaseService: self.firebaseService)
-        self.favoritesManager = favoritesManager ?? FavoritesManager(firebaseService: self.firebaseService)
+        self.favoritesManager = favoritesManager ?? FavoritesManager()
         self.watchConnectivityManager = watchConnectivityManager ?? WatchConnectivityManager()
         self.speechManager = speechManager ?? SpeechManager()
-        self.affirmationCache = affirmationCache ?? AffirmationCacheManager(firebaseService: self.firebaseService)
+        self.affirmationCacheManager = affirmationCacheManager ?? AffirmationCacheManager(
+            firebaseService: self.firebaseService,
+            isPreview: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+        )
         
         // Set up dependencies
         self.authManager.navigationState = self.navigationState

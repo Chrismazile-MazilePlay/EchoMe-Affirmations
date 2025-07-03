@@ -9,7 +9,7 @@ import SwiftData
 import Foundation
 
 @Model
-final class AffirmationCache {
+final class affirmationCache {
     @Attribute(.unique) var id: String
     var text: String
     var categories: [String]

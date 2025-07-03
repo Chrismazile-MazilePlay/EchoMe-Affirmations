@@ -12,7 +12,7 @@ struct VoiceProfile {
     let identifier: String?
     let rate: Float
     let pitch: Float
-    let volume: Float
+    var volume: Float
     
     static let defaultVoiceProfile = VoiceProfile(
         name: "Calm & Clear",

@@ -16,7 +16,7 @@ struct EchoMeAffirmationsApp: App {
         WindowGroup {
             RootView()
                 .environment(\.services, services)
-                .modelContainer(for: CachedAffirmation.self)
+                .modelContainer(for: AffirmationCache.self)
         }
     }
 }

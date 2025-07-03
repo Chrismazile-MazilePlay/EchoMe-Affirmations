@@ -5,103 +5,80 @@
 //  Created by Christopher Mazile on 7/1/25.
 //
 
-//
-//  FavoritesView.swift
-//  EchoMe-Affirmations
-//
-//  Created by Christopher Mazile on 7/1/25.
-//
-
 import SwiftUI
 
 struct FavoritesView: View {
     @Environment(\.services) private var services
     @State private var favorites: [Affirmation] = []
-    @State private var isLoading = true
     
     var body: some View {
-        NavigationStack {
-            FavoritesContent(
-                favorites: favorites,
-                isLoading: isLoading,
-                onRemoveFavorite: removeFavorite
-            )
-            .navigationTitle("Favorites")
-            .navigationBarTitleDisplayMode(.inline)
+        ZStack(alignment: .top) {
+            if favorites.isEmpty {
+                emptyStateView
+            } else {
+                favoritesList
+            }
         }
-        .onAppear { loadInitialData() }
+        .navigationTitle("Favorites")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            loadFavorites()
+            startListeningIfNeeded()
+        }
         .onChange(of: services.favoritesManager.favoriteIds) { _, _ in
-            reloadFavorites()
+            loadFavorites()
+        }
+    }
+    
+    // MARK: - Views
+    
+    private var emptyStateView: some View {
+        ContentUnavailableView(
+            "No favorites yet",
+            systemImage: "heart.slash",
+            description: Text("Tap the heart on affirmations you love")
+        )
+    }
+    
+    private var favoritesList: some View {
+        ScrollView {
+            VStack(spacing: 15) {
+                ForEach(favorites) { favorite in
+                    AffirmationCard(
+                        id: favorite.id,
+                        text: favorite.text
+                    )
+                }
+            }
+            .padding()
+            .padding(.top, 12)
         }
     }
     
     // MARK: - Data Loading
-    private func loadInitialData() {
+    
+    private func loadFavorites() {
         if MockDataProvider.isPreview {
-            loadMockFavorites()
-        } else {
-            ensureListenerStarted()
-            Task { await loadFavorites() }
-        }
-    }
-    
-    private func ensureListenerStarted() {
-        if !services.favoritesManager.isListening {
-            services.favoritesManager.startListening()
-        }
-    }
-    
-    private func reloadFavorites() {
-        if !MockDataProvider.isPreview {
-            Task { await loadFavorites() }
-        }
-    }
-    
-    private func loadMockFavorites() {
-        MockDataProvider.simulateLoading(seconds: 0.3) {
-            self.favorites = MockDataProvider.shared.getFavoriteAffirmations()
-            self.isLoading = false
-        }
-    }
-    
-    private func loadFavorites() async {
-        guard let userId = services.authManager.currentUser?.uid else {
-            await MainActor.run {
-                self.isLoading = false
-            }
+            favorites = MockDataProvider.shared.getFavoriteAffirmations()
             return
         }
         
-        do {
-            let favoriteData = try await services.firebaseService.fetchFavorites(userId: userId)
-            
-            await MainActor.run {
-                self.favorites = favoriteData.map { data in
-                    Affirmation(
-                        id: data.id,
-                        text: data.text,
-                        categories: [],  // Favorites don't store categories
-                        tone: nil,
-                        length: nil
-                    )
-                }
-                self.isLoading = false
-            }
-        } catch {
-            print("Error loading favorites: \(error)")
-            await MainActor.run {
-                self.isLoading = false
-            }
+        // Load from cache immediately
+        let cachedFavoriteData = services.favoritesManager.getCachedFavorites()
+        favorites = cachedFavoriteData.map { data in
+            Affirmation(
+                id: data.id,
+                text: data.text,
+                categories: [],
+                tone: nil,
+                length: nil
+            )
         }
     }
     
-    // MARK: - Actions
-    private func removeFavorite(_ affirmation: Affirmation) {
-        Task {
-            try? await services.favoritesManager.toggleFavorite(
-                affirmationId: affirmation.id,
-                affirmationText: affirmation.text
-            )
+    private func startListeningIfNeeded() {
+        if !MockDataProvider.isPreview && !services.favoritesManager.isListening {
+            services.favoritesManager.startListening()
         }
     }
 }
