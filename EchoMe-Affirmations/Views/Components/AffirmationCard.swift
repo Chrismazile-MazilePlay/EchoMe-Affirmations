@@ -24,13 +24,12 @@ struct AffirmationCard: View {
     @State private var userVoiceProfile: VoiceProfile?
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            affirmationText
-            actionButtons
+        GlassCard(material: .regularMaterial) {
+            VStack {
+                affirmationText
+                actionButtons
+            }
         }
-        .padding()
-        .background(cardBackground)
-        .onAppear { loadUserVoiceProfile() }
     }
     
     // MARK: - View Components

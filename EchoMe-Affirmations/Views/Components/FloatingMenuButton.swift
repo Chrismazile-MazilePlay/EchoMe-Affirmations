@@ -48,141 +48,175 @@ struct FloatingMenuButton: View {
                 isExpanded = true
             }
         }) {
-            HStack(spacing: 12) {
-                Image(systemName: "line.3.horizontal")
-                    .font(.title3)
-                Text("Menu")
-                Image(systemName: "chevron.down")
-                    .font(.caption)
+            GlassCard(
+                padding: 0,
+                cornerRadius: 25, // Half of height for capsule look
+                material: .ultraThinMaterial
+            ) {
+                HStack(spacing: 12) {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.title3)
+                    Text("Menu")
+                    Image(systemName: "chevron.down")
+                        .font(.caption)
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .background(
+                    Capsule()
+                        .fill(Color.green.opacity(0.2))
+                )
             }
-            .font(.headline)
-            .foregroundColor(.white)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(
-                Capsule()
-                    .fill(.ultraThinMaterial)
-                    .background(
-                        Capsule()
-                            .fill(Color.green.opacity(0.3))
-                    )
-            )
         }
-        .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .buttonStyle(ScaleButtonStyle())
     }
     
     // MARK: - Expanded State
     private var expandedMenu: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Menu items only - no header
+        GlassCard(padding: 0, cornerRadius: 20, material: .ultraThinMaterial) {
             VStack(alignment: .leading, spacing: 0) {
-                NavigationLink(destination: FavoritesView()) {
-                    menuItem(icon: "heart.fill", title: "Favorites")
-                }
-                .simultaneousGesture(TapGesture().onEnded { _ in
-                    withAnimation {
+                // Menu items
+                VStack(alignment: .leading, spacing: 0) {
+                    NavigationLink(destination: FavoritesView()) {
+                        menuItem(icon: "heart.fill", title: "Favorites", color: .red)
+                    }
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        withAnimation {
+                            isExpanded = false
+                        }
+                    })
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.2))
+                    
+                    NavigationLink(destination: VoiceSettingsView()) {
+                        menuItem(icon: "speaker.wave.3.fill", title: "Voice Settings", color: .blue)
+                    }
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        withAnimation {
+                            isExpanded = false
+                        }
+                    })
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.2))
+                    
+                    NavigationLink(destination: ContinuousPlayView()) {
+                        menuItem(icon: "infinity", title: "Continuous Play", color: .purple)
+                    }
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        withAnimation {
+                            isExpanded = false
+                        }
+                    })
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.2))
+                    
+                    NavigationLink(destination: ProfileView()) {
+                        menuItem(icon: "person.circle.fill", title: "Profile", color: .green)
+                    }
+                    .simultaneousGesture(TapGesture().onEnded { _ in
+                        withAnimation {
+                            isExpanded = false
+                        }
+                    })
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.3))
+                        .padding(.vertical, 8)
+                    
+                    Button(action: {
                         isExpanded = false
+                        services.authManager.signOut()
+                    }) {
+                        menuItem(icon: "arrow.right.square.fill", title: "Sign Out", color: .orange)
                     }
-                })
-                
-                NavigationLink(destination: VoiceSettingsView()) {
-                    menuItem(icon: "speaker.wave.3.fill", title: "Voice Settings")
+                    
+                    Divider()
+                        .background(Color.white.opacity(0.2))
+                    
+                    // Close button at the bottom
+                    Button(action: {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                            isExpanded = false
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.gray)
+                                .frame(width: 24)
+                            
+                            Text("Close")
+                                .font(.body)
+                            
+                            Spacer()
+                        }
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                    }
                 }
-                .simultaneousGesture(TapGesture().onEnded { _ in
-                    withAnimation {
-                        isExpanded = false
-                    }
-                })
-                
-                NavigationLink(destination: ContinuousPlayView()) {
-                    menuItem(icon: "infinity", title: "Continuous Play")
-                }
-                .simultaneousGesture(TapGesture().onEnded { _ in
-                    withAnimation {
-                        isExpanded = false
-                    }
-                })
-                
-                NavigationLink(destination: ProfileView()) {
-                    menuItem(icon: "person.circle.fill", title: "Profile")
-                }
-                .simultaneousGesture(TapGesture().onEnded { _ in
-                    withAnimation {
-                        isExpanded = false
-                    }
-                })
-                
-                Divider()
-                    .background(Color.white.opacity(0.2))
-                    .padding(.vertical, 8)
-                
-                Button(action: {
-                    isExpanded = false
-                    services.authManager.signOut()
-                }) {
-                    menuItem(icon: "arrow.right.square.fill", title: "Sign Out")
-                }
-                
-                // Close button at the bottom
-                Button(action: {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isExpanded = false
-                    }
-                }) {
-                    HStack {
-                        Image(systemName: "xmark")
-                            .font(.title3)
-                            .frame(width: 24)
-                        
-                        Text("Close")
-                            .font(.body)
-                        
-                        Spacer()
-                    }
-                    .foregroundColor(.white.opacity(0.7))
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 14)
-                }
+                .padding(.vertical, 8)
             }
-            .padding(.vertical, 8)
+            .frame(width: 280)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.green.opacity(0.15))
+            )
         }
-        .frame(width: 280)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.ultraThinMaterial)
-                .background(
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.green.opacity(0.3))
-                )
-        )
-        .shadow(color: .black.opacity(0.3), radius: 20, x: 0, y: 10)
     }
     
     private func menuItem(
         icon: String,
-        title: String
+        title: String,
+        color: Color = .white
     ) -> some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title3)
+                .foregroundColor(color)
                 .frame(width: 24)
             
             Text(title)
                 .font(.body)
+                .fontWeight(.medium)
             
             Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.5))
         }
         .foregroundColor(.white)
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
+        .contentShape(Rectangle())
+        .hoverEffect(.lift)
+    }
+}
+
+// MARK: - Custom Button Style
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
 // MARK: - Preview
 #Preview {
     ZStack {
-        Color.green.opacity(0.3)
-            .ignoresSafeArea()
+        LinearGradient(
+            colors: [.blue, .purple],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
         
         VStack {
             HStack {
