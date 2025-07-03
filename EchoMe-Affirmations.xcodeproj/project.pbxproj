@@ -546,6 +546,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 2AA8CF1A2E136F5A003B2C59 /* Build configuration list for PBXNativeTarget "EchoMe-Affirmations" */;
 			buildPhases = (
+				2A0BD92D2E1718C50029B6DB /* ShellScript */,
 				2AA8CEF22E136F58003B2C59 /* Sources */,
 				2AA8CEF32E136F58003B2C59 /* Frameworks */,
 				2AA8CEF42E136F58003B2C59 /* Resources */,
@@ -784,6 +785,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2A0BD92D2E1718C50029B6DB /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2AA8CEF22E136F58003B2C59 /* Sources */ = {
