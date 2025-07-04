@@ -1,0 +1,14 @@
+
+# A basic starting configuration for SwiftLint
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - private_outlet
+  - redundant_nil_coalescing
+
+excluded: # paths to ignore
+  - Pods
+  - SourcePackages
+
+line_length: 120
