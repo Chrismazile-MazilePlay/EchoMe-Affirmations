@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol AuthenticationRepositoryProtocol {
+protocol AuthenticationRepositoryProtocol: ServiceProtocol {
     var authStatePublisher: AnyPublisher<AuthState, Never> { get }
     func signIn(email: String, password: String) async throws -> User
     func signUp(email: String, password: String, name: String?) async throws -> User

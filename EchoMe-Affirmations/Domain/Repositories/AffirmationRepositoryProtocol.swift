@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol AffirmationRepositoryProtocol {
+protocol AffirmationRepositoryProtocol: ServiceProtocol {
     func fetchAffirmations() async throws -> [Affirmation]
     func fetchAffirmation(id: String) async throws -> Affirmation?
     func fetchAffirmationsByCategory(_ category: String) async throws -> [Affirmation]

@@ -5,6 +5,13 @@
 //  Created by Christopher Mazile on 7/5/25.
 //
 
+//
+//  ServiceAssembly.swift
+//  EchoMe-Affirmations
+//
+//  Created by Christopher Mazile on 01/06/25.
+//
+
 import Foundation
 import SwiftData
 
@@ -42,14 +49,16 @@ extension ServicesContainer {
             return UserRepository(firebaseService: firebaseService)
         }
         
-        // ViewModels
-        container.register(AuthenticationViewModel.self) { _ in
-            return AuthenticationViewModel()
+        // ViewModels - NOW PROPERLY INJECTED
+        container.register(AuthenticationViewModel.self) { container in
+            let authRepository = container.resolve(AuthenticationRepositoryProtocol.self)
+            return AuthenticationViewModel(authRepository: authRepository)
         }
         
-        // ViewModels
-        container.register(AuthenticationViewModel.self) { container in
-            return AuthenticationViewModel()
+        container.register(OnboardingViewModel.self) { container in
+            let userRepository = container.resolve(UserRepositoryProtocol.self)
+            let authViewModel = container.resolve(AuthenticationViewModel.self)
+            return OnboardingViewModel(userRepository: userRepository, authViewModel: authViewModel)
         }
         
         return container
@@ -88,9 +97,16 @@ extension ServicesContainer {
             return UserRepository(firebaseService: firebaseService)
         }
         
-        // ViewModels
-        container.register(AuthenticationViewModel.self) { _ in
-            return AuthenticationViewModel()
+        // ViewModels - NOW PROPERLY INJECTED
+        container.register(AuthenticationViewModel.self) { container in
+            let authRepository = container.resolve(AuthenticationRepositoryProtocol.self)
+            return AuthenticationViewModel(authRepository: authRepository)
+        }
+        
+        container.register(OnboardingViewModel.self) { container in
+            let userRepository = container.resolve(UserRepositoryProtocol.self)
+            let authViewModel = container.resolve(AuthenticationViewModel.self)
+            return OnboardingViewModel(userRepository: userRepository, authViewModel: authViewModel)
         }
         
         return container

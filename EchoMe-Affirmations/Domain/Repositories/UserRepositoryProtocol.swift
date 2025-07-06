@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol UserRepositoryProtocol {
+protocol UserRepositoryProtocol: ServiceProtocol {
     func getCurrentUser() async throws -> User?
     func updateUser(_ user: User) async throws
     func updateCategories(_ categories: [String]) async throws

@@ -10,42 +10,38 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(\.services) private var services
     @State private var currentStep = 0
+    @State private var viewModel: OnboardingViewModel?
     
     var body: some View {
         TabView(selection: $currentStep) {
             WelcomeView()
                 .tag(0)
             
-            CategorySelectionView()
-                .tag(1)
+            CategorySelectionView(selectedCategories: Binding(
+                get: { viewModel?.selectedCategories ?? [] },
+                set: { viewModel?.selectedCategories = $0 }
+            ))
+            .tag(1)
             
-            VoiceSelectionView()
-                .tag(2)
+            VoiceSelectionView(selectedVoice: Binding(
+                get: { viewModel?.selectedVoice ?? "Samantha" },
+                set: { viewModel?.selectedVoice = $0 }
+            ))
+            .tag(2)
             
-            OnboardingCompleteView {
-                completeOnboarding()
+            OnboardingCompleteView(isLoading: viewModel?.isCompleting ?? false) {
+                Task {
+                    try await viewModel?.completeOnboarding()
+                }
             }
             .tag(3)
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
-    }
-    
-    private func completeOnboarding() {
-        if let user = services.authViewModel.currentUser {
-            var updatedUser = user
-            updatedUser = User(
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                createdAt: user.createdAt,
-                selectedCategories: user.selectedCategories,
-                voiceProfile: user.voiceProfile,
-                hasCompletedOnboarding: true,
-                preferences: user.preferences
-            )
-            services.authViewModel.currentUser = updatedUser
-            services.authViewModel.authState = .signedIn(updatedUser)
+        .onAppear {
+            if viewModel == nil {
+                viewModel = services.resolve(OnboardingViewModel.self)
+            }
         }
     }
 }
@@ -83,7 +79,7 @@ struct WelcomeView: View {
 }
 
 struct CategorySelectionView: View {
-    @State private var selectedCategories: Set<String> = []
+    @Binding var selectedCategories: Set<String>
     let categories = ["Self-Love", "Confidence", "Motivation", "Peace", "Success", "Gratitude"]
     
     var body: some View {
@@ -139,7 +135,7 @@ struct CategoryChip: View {
 }
 
 struct VoiceSelectionView: View {
-    @State private var selectedVoice = "Samantha"
+    @Binding var selectedVoice: String
     let voices = ["Samantha", "Daniel", "Karen"]
     
     var body: some View {
@@ -209,7 +205,8 @@ struct VoiceOptionCard: View {
 }
 
 struct OnboardingCompleteView: View {
-    let onComplete: () -> Void
+    let isLoading: Bool
+    let onComplete: () async -> Void
     
     var body: some View {
         VStack(spacing: 32) {
@@ -233,16 +230,26 @@ struct OnboardingCompleteView: View {
             Spacer()
             
             Button {
-                onComplete()
+                Task {
+                    await onComplete()
+                }
             } label: {
-                Text("Get Started")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                HStack {
+                    if isLoading {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text("Get Started")
+                            .font(.headline)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(12)
             }
+            .disabled(isLoading)
             .padding(.horizontal)
             .padding(.bottom, 50)
         }

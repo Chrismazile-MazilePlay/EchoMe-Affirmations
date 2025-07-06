@@ -12,9 +12,9 @@ struct User: Identifiable, Equatable {
     let email: String
     let name: String?
     let createdAt: Date
-    let selectedCategories: [String]
-    let voiceProfile: String
-    let hasCompletedOnboarding: Bool
+    var selectedCategories: [String]
+    var voiceProfile: VoiceProfile
+    var hasCompletedOnboarding: Bool
     let preferences: UserPreferences
     
     init(
@@ -23,7 +23,7 @@ struct User: Identifiable, Equatable {
         name: String? = nil,
         createdAt: Date = Date(),
         selectedCategories: [String] = [],
-        voiceProfile: String = "Samantha",
+        voiceProfile: VoiceProfile = .defaultProfile,
         hasCompletedOnboarding: Bool = false,
         preferences: UserPreferences = UserPreferences()
     ) {

@@ -29,7 +29,7 @@ struct EchoMeApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environment(\.services, servicesContainer)
                 .modelContainer(modelContainer)
         }

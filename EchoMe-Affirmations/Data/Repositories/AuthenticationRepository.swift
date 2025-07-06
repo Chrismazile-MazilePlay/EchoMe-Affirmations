@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-final class AuthenticationRepository: AuthenticationRepositoryProtocol, ServiceProtocol {
+final class AuthenticationRepository: AuthenticationRepositoryProtocol {
     private let firebaseService: FirebaseServiceProtocol
     private let authStateSubject = CurrentValueSubject<AuthState, Never>(.signedOut)
     private var isSetup = false

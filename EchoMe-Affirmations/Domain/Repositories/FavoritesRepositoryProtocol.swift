@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol FavoritesRepositoryProtocol {
+protocol FavoritesRepositoryProtocol: ServiceProtocol {
     var favoriteIdsPublisher: AnyPublisher<Set<String>, Never> { get }
     func addFavorite(affirmationId: String, text: String) async throws
     func removeFavorite(affirmationId: String) async throws

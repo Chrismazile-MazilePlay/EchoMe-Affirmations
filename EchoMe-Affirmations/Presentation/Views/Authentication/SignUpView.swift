@@ -5,6 +5,13 @@
 //  Created by Christopher Mazile on 7/5/25.
 //
 
+//
+//  SignUpView.swift
+//  EchoMe-Affirmations
+//
+//  Created by Christopher Mazile on 01/06/25.
+//
+
 import SwiftUI
 
 struct SignUpView: View {
@@ -18,12 +25,12 @@ struct SignUpView: View {
     
     let onSignUp: (String, String, String?) async throws -> Void
     let onSignInTap: () -> Void
+    let passwordError: String?
     
     private var isFormValid: Bool {
         !email.isEmpty &&
         !password.isEmpty &&
-        password == confirmPassword &&
-        password.count >= 6
+        password == confirmPassword
     }
     
     var body: some View {
@@ -65,10 +72,25 @@ struct SignUpView: View {
                     .textFieldStyle(RoundedTextFieldStyle())
                     .textContentType(.newPassword)
                 
-                if !password.isEmpty && password != confirmPassword {
-                    Text("Passwords don't match")
-                        .font(.caption)
-                        .foregroundColor(.red)
+                // Password validation messages
+                VStack(alignment: .leading, spacing: 4) {
+                    if !password.isEmpty && password != confirmPassword {
+                        Text("Passwords don't match")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    
+                    if let error = passwordError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    
+                    if password.isEmpty {
+                        Text("Password must contain:\n• At least 8 characters\n• Uppercase and lowercase letters\n• At least one number\n• At least one special character")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
             
@@ -134,6 +156,7 @@ struct SignUpView: View {
         },
         onSignInTap: {
             print("Sign in tapped")
-        }
+        },
+        passwordError: nil
     )
 }
