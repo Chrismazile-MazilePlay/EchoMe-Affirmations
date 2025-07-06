@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2A0BDCB22E1A18A10029B6DB /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2A0BDCB12E1A18A10029B6DB /* FirebaseAuth */; };
+		2A0BDCB42E1A18A10029B6DB /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2A0BDCB32E1A18A10029B6DB /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		2A0BDBF42E19F2560029B6DB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -30,11 +35,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2A0BDBE62E19F2540029B6DB /* EchoMe-Affirmations */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "EchoMe-Affirmations";
-			sourceTree = "<group>";
-		};
 		2A0BDBF62E19F2560029B6DB /* EchoMe-AffirmationsTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "EchoMe-AffirmationsTests";
@@ -45,6 +45,11 @@
 			path = "EchoMe-AffirmationsUITests";
 			sourceTree = "<group>";
 		};
+		2A0BDC1D2E19F4440029B6DB /* EchoMe-Affirmations */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "EchoMe-Affirmations";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A0BDCB22E1A18A10029B6DB /* FirebaseAuth in Frameworks */,
+				2A0BDCB42E1A18A10029B6DB /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,7 +82,7 @@
 		2A0BDBDB2E19F2540029B6DB = {
 			isa = PBXGroup;
 			children = (
-				2A0BDBE62E19F2540029B6DB /* EchoMe-Affirmations */,
+				2A0BDC1D2E19F4440029B6DB /* EchoMe-Affirmations */,
 				2A0BDBF62E19F2560029B6DB /* EchoMe-AffirmationsTests */,
 				2A0BDC002E19F2560029B6DB /* EchoMe-AffirmationsUITests */,
 				2A0BDBE52E19F2540029B6DB /* Products */,
@@ -108,10 +115,12 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2A0BDBE62E19F2540029B6DB /* EchoMe-Affirmations */,
+				2A0BDC1D2E19F4440029B6DB /* EchoMe-Affirmations */,
 			);
 			name = "EchoMe-Affirmations";
 			packageProductDependencies = (
+				2A0BDCB12E1A18A10029B6DB /* FirebaseAuth */,
+				2A0BDCB32E1A18A10029B6DB /* FirebaseFirestore */,
 			);
 			productName = "EchoMe-Affirmations";
 			productReference = 2A0BDBE42E19F2540029B6DB /* EchoMe-Affirmations.app */;
@@ -195,6 +204,9 @@
 			);
 			mainGroup = 2A0BDBDB2E19F2540029B6DB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2A0BDCB02E1A18A10029B6DB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2A0BDBE52E19F2540029B6DB /* Products */;
 			projectDirPath = "";
@@ -558,6 +570,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2A0BDCB02E1A18A10029B6DB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.15.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2A0BDCB12E1A18A10029B6DB /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A0BDCB02E1A18A10029B6DB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		2A0BDCB32E1A18A10029B6DB /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2A0BDCB02E1A18A10029B6DB /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2A0BDBDC2E19F2540029B6DB /* Project object */;
 }
