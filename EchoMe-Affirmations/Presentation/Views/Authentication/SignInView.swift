@@ -20,7 +20,7 @@ struct SignInView: View {
     var body: some View {
         VStack(spacing: 24) {
             // Logo
-            Image(systemName: "quote.bubble.fill")
+            Image(systemName: "sparkles")
                 .font(.system(size: 80))
                 .foregroundColor(.accentColor)
                 .padding(.bottom, 20)
@@ -92,12 +92,19 @@ struct SignInView: View {
     }
     
     private func signIn() async {
+        print("🟦 SignInView: SignIn button tapped")
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            isLoading = false
+            print("🟦 SignInView: Loading state cleared")
+        }
         
         do {
+            print("🟦 SignInView: Calling onSignIn with email: \(email)")
             try await onSignIn(email, password)
+            print("🟦 SignInView: onSignIn completed successfully")
         } catch {
+            print("🟦 SignInView: SignIn error: \(error)")
             errorMessage = error.localizedDescription
             showError = true
         }

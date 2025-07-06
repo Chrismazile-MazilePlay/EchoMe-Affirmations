@@ -22,9 +22,24 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     // MARK: - Authentication
     
+//    func signIn(email: String, password: String) async throws -> String {
+//        let result = try await auth.signIn(withEmail: email, password: password)
+//        return result.user.uid
+//    }
+    
     func signIn(email: String, password: String) async throws -> String {
-        let result = try await auth.signIn(withEmail: email, password: password)
-        return result.user.uid
+        print("🟪 FirebaseService: SignIn called - email: \(email)")
+        
+        do {
+            let result = try await Auth.auth().signIn(withEmail: email, password: password)
+            print("🟪 FirebaseService: Firebase Auth successful - uid: \(result.user.uid)")
+            return result.user.uid
+        } catch {
+            print("🟪 FirebaseService: Firebase Auth error: \(error)")
+            print("🟪 FirebaseService: Error code: \((error as NSError).code)")
+            print("🟪 FirebaseService: Error domain: \((error as NSError).domain)")
+            throw error
+        }
     }
     
     func signUp(email: String, password: String) async throws -> String {

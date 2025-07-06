@@ -8,17 +8,29 @@
 import Foundation
 
 final class ServicesContainer {
-    private var services: [ObjectIdentifier: Any] = [:]
+    private var factories: [ObjectIdentifier: Any] = [:]
+    private var instances: [ObjectIdentifier: Any] = [:]
     
     func register<T>(_ type: T.Type, factory: @escaping (ServicesContainer) -> T) {
-        services[ObjectIdentifier(type)] = factory
+        factories[ObjectIdentifier(type)] = factory
     }
     
     func resolve<T>(_ type: T.Type) -> T {
-        guard let factory = services[ObjectIdentifier(type)] as? (ServicesContainer) -> T else {
+        let key = ObjectIdentifier(type)
+        
+        // Return cached instance if exists
+        if let instance = instances[key] as? T {
+            return instance
+        }
+        
+        // Create new instance using factory
+        guard let factory = factories[key] as? (ServicesContainer) -> T else {
             fatalError("Service \(type) not registered. Please check your registration logic.")
         }
-        return factory(self)
+        
+        let instance = factory(self)
+        instances[key] = instance
+        return instance
     }
     
     // Computed properties for backward compatibility

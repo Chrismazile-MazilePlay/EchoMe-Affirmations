@@ -7,13 +7,14 @@ https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/mai
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations.xcodeproj/project.xcworkspace/xcuserdata/chrismazile.xcuserdatad/UserInterfaceState.xcuserstate
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Constants/AppConstants.swift
+https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Extensions/TextFieldStyles.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Utilities/MockDataProvider.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/DependencyInjection/ServiceAssembly.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/DependencyInjection/InjectionKey.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/DependencyInjection/ServicesContainer.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Protocols/FirebaseServiceProtocol.swift
-https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Protocols/ServiceProtocol.swift
 
+https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Core/Protocols/ServiceProtocol.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Assets.xcassets/AppIcon.appiconset/Contents.json
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Assets.xcassets/AccentColor.colorset/Contents.json
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Assets.xcassets/Contents.json
@@ -28,8 +29,8 @@ https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/mai
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Data/Repositories/AuthenticationRepository.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Data/Repositories/AffirmationRepository.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Data/Repositories/FavoritesRepository.swift
-https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Repositories/FavoritesRepositoryProtocol.swift
 
+https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Repositories/FavoritesRepositoryProtocol.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Repositories/UserRepositoryProtocol.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Repositories/AffirmationRepositoryProtocol.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Repositories/AuthenticationRepositoryProtocol.swift
@@ -40,12 +41,13 @@ https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/mai
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Domain/Models/Affirmation.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/ViewModels/ContentViewModel.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/ViewModels/AuthenticationViewModel.swift
+https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/ViewModels/OnboardingViewModel.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/FavoritesView.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/SettingsView.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/Components/AffirmationCard.swift
+
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/Components/FloatingMenuButton.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/Authentication/SignInView.swift
-
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/Authentication/SignUpView.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/ContentView.swift
 https://raw.githubusercontent.com/Chrismazile-MazilePlay/EchoMe-Affirmations/main/EchoMe-Affirmations/Presentation/Views/FullScreenAffirmationView.swift

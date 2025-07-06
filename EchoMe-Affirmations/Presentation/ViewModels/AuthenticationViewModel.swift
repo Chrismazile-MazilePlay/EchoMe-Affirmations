@@ -11,7 +11,7 @@ import Combine
 
 @Observable
 final class AuthenticationViewModel {
-    var authState: AuthState = .signedOut  // Changed from .loading
+    var authState: AuthState = .signedOut
     var currentUser: User?
     var passwordError: String?
     
@@ -19,22 +19,21 @@ final class AuthenticationViewModel {
     private var cancellables = Set<AnyCancellable>()
     
     init(authRepository: AuthenticationRepositoryProtocol) {
+        print("🟨 AuthViewModel: Init ONCE with repository: \(type(of: authRepository))")
         self.authRepository = authRepository
         observeAuthState()
-//        // Computed properties for backward compatibility
-//    var authViewModel: AuthenticationViewModel {
-//        resolve(AuthenticationViewModel.self)
-//    }
-//    
-//    var mockDataProvider: MockDataProvider {
-//        resolve(MockDataProvider.self)
-//    }
-}
+        
+        // Check initial auth state
+        Task {
+            await checkAuthStatus()
+        }
+    }
     
     private func observeAuthState() {
         authRepository.authStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
+                print("🟨 AuthViewModel: State update received: \(state)")
                 self?.authState = state
                 if case .signedIn(let user) = state {
                     self?.currentUser = user
@@ -77,6 +76,7 @@ final class AuthenticationViewModel {
     }
     
     func signIn(email: String, password: String) async throws {
+        print("🟨 AuthViewModel: SignIn called - email: \(email)")
         authState = .loading
         _ = try await authRepository.signIn(email: email, password: password)
         // Auth state will update via publisher
@@ -87,6 +87,7 @@ final class AuthenticationViewModel {
             throw AuthenticationError.invalidPassword(passwordError ?? "Invalid password")
         }
         
+        print("🟨 AuthViewModel: SignUp called - email: \(email)")
         authState = .loading
         _ = try await authRepository.signUp(email: email, password: password, name: name)
         // Auth state will update via publisher
@@ -99,8 +100,8 @@ final class AuthenticationViewModel {
     }
     
     func checkAuthStatus() async {
+        print("🟨 AuthViewModel: Checking auth status...")
         if authRepository.isReady {
-            // Repository already setup, check current user
             if let user = authRepository.getCurrentUser() {
                 authState = .signedIn(user)
                 currentUser = user
@@ -108,7 +109,6 @@ final class AuthenticationViewModel {
                 authState = .signedOut
             }
         } else {
-            // Setup repository (will check Firebase auth state)
             do {
                 try await authRepository.setup()
             } catch {

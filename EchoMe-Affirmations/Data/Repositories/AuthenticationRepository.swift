@@ -31,12 +31,29 @@ final class AuthenticationRepository: AuthenticationRepositoryProtocol {
         isSetup = true
     }
     
+//    func signIn(email: String, password: String) async throws -> User {
+//        authStateSubject.send(.loading)
+//        let userId = try await firebaseService.signIn(email: email, password: password)
+//        let user = User(id: userId, email: email)
+//        authStateSubject.send(.signedIn(user))
+//        return user
+//    }
+    
     func signIn(email: String, password: String) async throws -> User {
+        print("🟥 AuthRepository: SignIn called - email: \(email)")
         authStateSubject.send(.loading)
-        let userId = try await firebaseService.signIn(email: email, password: password)
-        let user = User(id: userId, email: email)
-        authStateSubject.send(.signedIn(user))
-        return user
+        
+        do {
+            let userId = try await firebaseService.signIn(email: email, password: password)
+            print("🟥 AuthRepository: Firebase signIn successful - userId: \(userId)")
+            let user = User(id: userId, email: email)
+            authStateSubject.send(.signedIn(user))
+            return user
+        } catch {
+            print("🟥 AuthRepository: Firebase signIn error: \(error)")
+            authStateSubject.send(.signedOut)
+            throw error
+        }
     }
     
     func signUp(email: String, password: String, name: String?) async throws -> User {

@@ -14,17 +14,22 @@ struct EchoMeApp: App {
     let modelContainer: ModelContainer
     
     init() {
+        print("🟦 EchoMeApp: Starting initialization")
         FirebaseConfiguration.configure()
+        print("🟦 EchoMeApp: Firebase configured")
         
         // Set up model container
         do {
             modelContainer = try ModelContainer(for: AffirmationCache.self)
+            print("🟦 EchoMeApp: ModelContainer created")
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
         
         // Set up services container
-        _servicesContainer = State(initialValue: ServicesContainer.production(modelContext: modelContainer.mainContext))
+        let container = ServicesContainer.production(modelContext: modelContainer.mainContext)
+        print("🟦 EchoMeApp: ServicesContainer created")
+        _servicesContainer = State(initialValue: container)
     }
     
     var body: some Scene {

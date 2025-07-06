@@ -5,23 +5,22 @@
 //  Created by Christopher Mazile on 7/5/25.
 //
 
-//
-//  ServiceAssembly.swift
-//  EchoMe-Affirmations
-//
-//  Created by Christopher Mazile on 01/06/25.
-//
-
 import Foundation
 import SwiftData
 
 extension ServicesContainer {
     static func production(modelContext: ModelContext? = nil) -> ServicesContainer {
+        print("🟩 ServiceAssembly: Creating production container")
         let container = ServicesContainer()
         
         // Core Services
+//        container.register(FirebaseServiceProtocol.self) { _ in
+//            FirebaseService()
+//        }
+        
         container.register(FirebaseServiceProtocol.self) { _ in
-            FirebaseService()
+            print("🟩 ServiceAssembly: Creating FirebaseService")
+            return FirebaseService()
         }
         
         container.register(MockDataProvider.self) { _ in
@@ -50,8 +49,15 @@ extension ServicesContainer {
         }
         
         // ViewModels - NOW PROPERLY INJECTED
+//        container.register(AuthenticationViewModel.self) { container in
+//            let authRepository = container.resolve(AuthenticationRepositoryProtocol.self)
+//            return AuthenticationViewModel(authRepository: authRepository)
+//        }
+        
         container.register(AuthenticationViewModel.self) { container in
+            print("🟩 ServiceAssembly: Creating AuthenticationViewModel")
             let authRepository = container.resolve(AuthenticationRepositoryProtocol.self)
+            print("🟩 ServiceAssembly: AuthRepository resolved: \(authRepository)")
             return AuthenticationViewModel(authRepository: authRepository)
         }
         
@@ -61,6 +67,7 @@ extension ServicesContainer {
             return OnboardingViewModel(userRepository: userRepository, authViewModel: authViewModel)
         }
         
+        print("🟩 ServiceAssembly: Production container ready")
         return container
     }
     
